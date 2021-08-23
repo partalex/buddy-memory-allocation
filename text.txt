@@ -1,7 +1,0 @@
-Slab_allocator{
-    kes* niz_keseva_za_bafere[13]; // [2^5, 2^17]
-    kes* lanac_keseva;
-
-    Buddy buddy;    
-}
-

@@ -1,5 +1,6 @@
 #include "../h/Strukture.h"
 #include "../h/slab.h"
+#include <math.h>
 
 void buddy_inicijalizacija(Buddy *buddy)
 {
@@ -71,10 +72,79 @@ Buddy_block *zauzmi(size_t potrebno_bajtova, Buddy *buddy)
     return slobodan;
 }
 
-unsigned oslobodi(Buddy_block *buddy_block, size_t broj_bajtova, Buddy *buddy)
-{
-    unsigned pocetna_adresa = 0;
-    unsigned adresa_za_oslobajdja = (unsigned)buddy_block - (unsigned)(buddy->pocetna_adesa);
+// unsigned moguca_adresa_brata(Buddy_block *buddy, size_t stepen_dvojke, short buddy_ispod)
+// {
+//     unsigned ret = (unsigned)buddy;
+//     unsigned stepen = pow(2,stepen_dvojke);
+//     switch (buddy_ispod)
+//     {
+//     case 0: // trazim brata iznad
+//         return ret - stepen * BLOCK_SIZE;
+//     case 1: // trazim brata ispod
+//         return ret + stepen * BLOCK_SIZE;
+//     }
+// }
 
-    return 1;
+Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke, Buddy *buddy) 
+{
+    Buddy_block *next = buddy->niz_slobodnih_blokova[*stepen_dvojke];
+    Buddy_block *prethodni = NULL;
+    Buddy_block *brat = NULL;
+    unsigned stepen = pow(2, *stepen_dvojke);
+    unsigned moguci_nizi_brat = (unsigned)buddy_brat - stepen * BLOCK_SIZE;
+    unsigned moguci_visi_brat = (unsigned)buddy_brat + stepen * BLOCK_SIZE;
+    short visi = 0; // visi = 1, nizi = 0
+    while (next)
+    {
+        if ((unsigned)next == moguci_nizi_brat)
+        {
+            brat = next;
+            break;
+        }
+        else if ((unsigned)next == moguci_visi_brat)
+        {
+            visi = 1;
+            brat = next;
+            break;
+        }
+        prethodni = next;
+        next = next->sledeci;
+    }
+    if (brat) // nasao brata
+    {
+        if (prethodni)
+        {
+            prethodni->sledeci = next->sledeci;
+        }
+        else
+        {
+            buddy->niz_slobodnih_blokova[*stepen_dvojke] = next->sledeci;
+        }
+        next = buddy->niz_slobodnih_blokova[++(*stepen_dvojke)];
+        while (next->sledeci)
+            next = next->sledeci;
+        if (visi)
+        {
+            next->sledeci = buddy_brat;
+            next->sledeci->sledeci = NULL;
+            return buddy_brat;
+        }
+        else
+        {
+            next->sledeci = (Buddy_block *)moguci_nizi_brat;
+            next->sledeci->sledeci = NULL;
+            return (Buddy_block *)moguci_nizi_brat;
+        }
+    }
+    return NULL; // nije uspeo da uradi merge brace, tj. nije nasao brata
+}
+
+unsigned oslobodi(Buddy_block *buddy_block, size_t stepen_dvojke, Buddy *buddy) 
+{
+    Buddy_block *next = spoji_ako_je_brat_slobodan(buddy_block, &stepen_dvojke, buddy);
+    while (next)
+    {
+        next = spoji_ako_je_brat_slobodan(next, &stepen_dvojke, buddy);
+    }
+    return stepen_dvojke;
 }
