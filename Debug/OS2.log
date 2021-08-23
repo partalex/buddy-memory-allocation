@@ -1,0 +1,3 @@
+﻿  slab.c
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(21,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+  OS2.vcxproj -> C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\Debug\OS2.exe

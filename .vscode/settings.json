@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "slaballoc.h": "c",
+        "strukture.h": "c"
+    }
+}
