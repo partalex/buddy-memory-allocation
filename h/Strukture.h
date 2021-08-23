@@ -1,6 +1,9 @@
 #pragma once
 
 #include <math.h>
+#include <stdio.h>
+
+// typedef struct kmem_cache_s kmem_cache_t;
 
 #define VELICINA_PAMTLJIVOG (10) // ovo bi trebalo da se izracuna
 // #define velicna_pamtljivog (floor(log2((double)995)) + 1) // ovo bi trebalo da se izracuna
@@ -21,28 +24,35 @@ typedef struct
     unsigned broj_blokova;
 } Buddy;
 
-void buddy_inicijalizacija(Buddy *buddy);
+void buddy_inic();
 unsigned bajtove_u_min_blokova(unsigned broj_bajtova);
 unsigned min_stepen_za_broj_blokova(unsigned broj_blokova);
-unsigned podeli_blok(unsigned index, Buddy *buddy);
-Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke, Buddy *buddy); // vrati adresu spojenog ili NULL ako nije nasao nista
-Buddy_block *zauzmi(size_t potrebno_bajtova, Buddy *buddy);
-unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova, Buddy *buddy); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
+unsigned podeli_blok(unsigned index);
+Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke); // vrati adresu spojenog ili NULL ako nije nasao nista
+struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota);
+unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
 
 /////////////////////////////************************/////////////////////////////
 /////////////////////////////****  Slab i Cashe  ****/////////////////////////////
 /////////////////////////////************************/////////////////////////////
 
-typedef struct s_Slab_block
+typedef struct s_Slab_block_header
 {
     struct s_Slab_block *sledeci;
-    unsigned prvi_slot;
+    void *prvi_slot;
     unsigned broj_slotova;
+    unsigned velicina_slota;
+    unsigned short stepen_dvojke;
+} Slab_block_header;
 
+typedef struct s_Slab_block
+{
+    Slab_block_header header;
     // struct kmem_cache_s* pripadam_kesu;
 
 } Slab_block;
 
+typedef struct kmem_cache_s kmem_cache_t;
 struct kmem_cache_s
 {
     void (*ctor)(void *);
@@ -65,10 +75,33 @@ struct kmem_cache_s
 typedef struct s_Slab
 {
     Buddy buddy;
-    struct kmem_cache_s baferisani_kesevi[BROJ_KESEVA_ZA_BAFERE];
-    struct kmem_cache_s *ulancani_kesevi; // nalazi se na mestu ispod slaba da moze se redja
+    kmem_cache_t baferisani_kesevi[BROJ_KESEVA_ZA_BAFERE];
+    kmem_cache_t *ulancani_kesevi; // nalazi se na mestu ispod slaba da moze se redja
     unsigned char niz_napravljenih_keseva[BROJ_TIPSKIH_KESEVA];
 
 } Slab;
 
-Slab *slab_inicijalizacija(void *);
+Slab *slab;
+Buddy *buddy;
+
+// enkapsulirane f-je
+
+void slab_inic(void *pocetna_adresa, unsigned ukupan_broj_blokova);
+kmem_cache_t *kes_alloc(const char *naziv, size_t velicina, // size je broj blokova ili velcina objekta tog tog tipa
+                        void (*ctor)(void *), void (*dtor)(void *));
+void kes_free(kmem_cache_t *kes);
+void *obj_alloc(kmem_cache_t *kes); // vraca obj tipa koji kes `cuva
+void obj_free(kmem_cache_t *kes, void *obj);
+void *buff_alloc(size_t size);
+void buff_free(const void *buff);
+kmem_cache_t *skupi_kes(kmem_cache_t *kes);
+void kes_info(kmem_cache_t *kes);
+int kes_error(kmem_cache_t *kes);
+
+// moje pomocne f-je
+
+void inic_baferske_keseve(kmem_cache_t *prvi_kes, unsigned broj_keseva);
+void inic_tipske_keseve();
+kmem_cache_t *daj_prazno_mesto_za_kes();
+void oslobodi_slabove_kesa(kmem_cache_t *kes);
+Slab_block *obezbedi_slab_za_objekat(kmem_cache_t *kes);

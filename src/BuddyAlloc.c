@@ -1,8 +1,8 @@
-#include "../h/Strukture.h"
 #include "../h/slab.h"
+#include "../h/Strukture.h"
 #include <math.h>
 
-void buddy_inicijalizacija(Buddy *buddy)
+void buddy_inic()
 {
     unsigned nedodeljeni_blokovi = buddy->broj_blokova;
     while (nedodeljeni_blokovi)
@@ -17,7 +17,7 @@ void buddy_inicijalizacija(Buddy *buddy)
 
 unsigned bajtove_u_min_blokova(unsigned broj_bajtova)
 {
-    return ceil(broj_bajtova / BLOCK_SIZE);
+    return ceil(1.* broj_bajtova / BLOCK_SIZE);
 }
 
 unsigned min_stepen_za_broj_blokova(unsigned broj_blokova)
@@ -25,7 +25,7 @@ unsigned min_stepen_za_broj_blokova(unsigned broj_blokova)
     return ceil(log2((double)broj_blokova));
 }
 
-unsigned podeli_blok(unsigned index, Buddy *buddy)
+unsigned podeli_blok(unsigned index)
 {
     Buddy_block *prvi_buddy = buddy->niz_slobodnih_blokova[index]; // uzmi prvi koji se deli
     buddy->niz_slobodnih_blokova[index] = prvi_buddy->sledeci;     // izbaci onaj kog delim
@@ -43,11 +43,12 @@ unsigned podeli_blok(unsigned index, Buddy *buddy)
     return index - 1;
 }
 
-Buddy_block *zauzmi(size_t potrebno_bajtova, Buddy *buddy)
+struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota)
 {
     unsigned potrebno_blokova = bajtove_u_min_blokova(potrebno_bajtova);
     unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
     Buddy_block *slobodan = NULL;
+    Slab_block *ret;
 
     unsigned sledeci_stepen = min_stepen;
     while (sledeci_stepen < VELICINA_PAMTLJIVOG)
@@ -57,7 +58,14 @@ Buddy_block *zauzmi(size_t potrebno_bajtova, Buddy *buddy)
             slobodan = buddy->niz_slobodnih_blokova[min_stepen];
             buddy->niz_slobodnih_blokova[min_stepen] = slobodan->sledeci;
             slobodan->sledeci = NULL;
-            return slobodan;
+            ret = (Slab_block *)slobodan;
+            memset(ret, 0, sizeof(Slab_block));
+            ret->header.stepen_dvojke = min_stepen;
+            ret->header.velicina_slota = velicina_slota;
+            ret->header.prvi_slot = (void*)((unsigned)ret + sizeof(Slab_block_header));
+            ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke)*BLOCK_SIZE) - sizeof(Slab_block_header);
+            ret->header.broj_slotova /= velicina_slota;
+            return ret;
         }
         if (buddy->niz_slobodnih_blokova[sledeci_stepen])
         {
@@ -69,10 +77,10 @@ Buddy_block *zauzmi(size_t potrebno_bajtova, Buddy *buddy)
             sledeci_stepen++;
         }
     }
-    return slobodan;
+    return NULL;
 }
 
-Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke, Buddy *buddy)
+Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke)
 {
     Buddy_block *next = buddy->niz_slobodnih_blokova[*stepen_dvojke];
     Buddy_block *prethodni = NULL;
@@ -126,12 +134,12 @@ Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_
     return NULL; // nije uspeo da uradi merge brace, tj. nije nasao brata
 }
 
-unsigned oslobodi(Buddy_block *buddy_block, size_t stepen_dvojke, Buddy *buddy)
+unsigned oslobodi(Buddy_block *buddy_block, size_t stepen_dvojke)
 {
-    Buddy_block *next = spoji_ako_je_brat_slobodan(buddy_block, &stepen_dvojke, buddy);
+    Buddy_block *next = spoji_ako_je_brat_slobodan(buddy_block, &stepen_dvojke);
     while (next)
     {
-        next = spoji_ako_je_brat_slobodan(next, &stepen_dvojke, buddy);
+        next = spoji_ako_je_brat_slobodan(next, &stepen_dvojke);
     }
     return stepen_dvojke;
 }

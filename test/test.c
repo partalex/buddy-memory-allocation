@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <windows.h>
-
 #include "../h/slab.h"
 #include "../test/test.h"
 

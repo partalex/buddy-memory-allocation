@@ -3,7 +3,6 @@
 #include <string.h>
 #include <assert.h>
 #include "../h/slab.h"
-#include "../h/Strukture.h"
 #include "../test/test.h"
 
 #define BLOCK_NUMBER (1000)
