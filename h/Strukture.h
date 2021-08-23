@@ -18,9 +18,7 @@ typedef struct
 {
     void *pocetna_adesa;
     Buddy_block *niz_slobodnih_blokova[VELICINA_PAMTLJIVOG];
-    // void **niz_slobodnih_blokova; // ovo bi trebalo da bude struktaura
     unsigned broj_blokova;
-    unsigned broj_ulaza;
 } Buddy;
 
 void buddy_inicijalizacija(Buddy *buddy);
@@ -60,16 +58,16 @@ struct kmem_cache_s
     struct kmem_cache_s *sledeci; // pokazivac
 };
 
-#define VELICINA_KESA (sizeof(struct kmem_cache_s))
-#define BROJ_RAZLICITIH_KESEVA (13)
-#define _0_PROSTOR_ZA_KESEVE (VELICINA_KESA * BROJ_RAZLICITIH_KESEVA)
+#define BROJ_KESEVA_ZA_BAFERE (13)
+#define BLOCK_SIZE (4096)
+#define BROJ_TIPSKIH_KESEVA (109)
 
 typedef struct s_Slab
 {
     Buddy buddy;
-    struct kmem_cache_s baferisani_kesevi[BROJ_RAZLICITIH_KESEVA];
-    struct kmem_cache_s **ulancani_kesevi; // nalazi se na mestu ispod slaba da moze se redja
-    // unsigned rezervisani_broj_keseva;
+    struct kmem_cache_s baferisani_kesevi[BROJ_KESEVA_ZA_BAFERE];
+    struct kmem_cache_s *ulancani_kesevi; // nalazi se na mestu ispod slaba da moze se redja
+    unsigned char niz_napravljenih_keseva[BROJ_TIPSKIH_KESEVA];
 
 } Slab;
 
