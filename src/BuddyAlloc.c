@@ -72,20 +72,7 @@ Buddy_block *zauzmi(size_t potrebno_bajtova, Buddy *buddy)
     return slobodan;
 }
 
-// unsigned moguca_adresa_brata(Buddy_block *buddy, size_t stepen_dvojke, short buddy_ispod)
-// {
-//     unsigned ret = (unsigned)buddy;
-//     unsigned stepen = pow(2,stepen_dvojke);
-//     switch (buddy_ispod)
-//     {
-//     case 0: // trazim brata iznad
-//         return ret - stepen * BLOCK_SIZE;
-//     case 1: // trazim brata ispod
-//         return ret + stepen * BLOCK_SIZE;
-//     }
-// }
-
-Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke, Buddy *buddy) 
+Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke, Buddy *buddy)
 {
     Buddy_block *next = buddy->niz_slobodnih_blokova[*stepen_dvojke];
     Buddy_block *prethodni = NULL;
@@ -139,7 +126,7 @@ Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_
     return NULL; // nije uspeo da uradi merge brace, tj. nije nasao brata
 }
 
-unsigned oslobodi(Buddy_block *buddy_block, size_t stepen_dvojke, Buddy *buddy) 
+unsigned oslobodi(Buddy_block *buddy_block, size_t stepen_dvojke, Buddy *buddy)
 {
     Buddy_block *next = spoji_ako_je_brat_slobodan(buddy_block, &stepen_dvojke, buddy);
     while (next)
