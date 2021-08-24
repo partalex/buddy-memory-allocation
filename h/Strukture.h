@@ -32,7 +32,7 @@ unsigned min_stepen_za_broj_blokova(unsigned broj_blokova);
 unsigned podeli_blok(unsigned index);
 Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke); // vrati adresu spojenog ili NULL ako nije nasao nista
 void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes);
-void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes);
+void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba);
 void slot_free(Kes *kes);
 struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes);
 unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
@@ -44,7 +44,7 @@ unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca 
 typedef struct s_Slab_block_header
 {
     struct s_Slab_block *sledeci;
-    void *prvi_slot;
+    unsigned*prvi_slot;
     unsigned broj_slotova;
     unsigned velicina_slota;
     unsigned broj_slobodnih_slotova;

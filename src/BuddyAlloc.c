@@ -87,9 +87,9 @@ void premesti_slab (Slab_block* slab_block, unsigned char* iz_praznog_slaba, Kes
     }
 }
 
-void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes)
+void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
 {
-    unsigned prazan_slot = (unsigned)slab_block->header.prvi_slot;
+    unsigned prazan_slot = slab_block->header.prvi_slot;
 
     for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
     {
@@ -97,7 +97,8 @@ void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *k
         if (*(char *)prazan_slot == 0)
         {
             slab_block->header.broj_slobodnih_slotova--;
-            premesti_slab(slab_block, iz_praznog_slaba, kes);
+            if(*iz_praznog_slaba !=2) // kad je poziva f-ja preuredi
+                premesti_slab(slab_block, iz_praznog_slaba, slab_block->header.moj_kes);
             return (void *)prazan_slot;
         }
     }
@@ -125,7 +126,7 @@ struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Ke
             memset(ret, 0, sizeof(Slab_block));
             ret->header.stepen_dvojke = min_stepen;
             ret->header.velicina_slota = velicina_slota;
-            ret->header.prvi_slot = (void *)((unsigned)ret + sizeof(Slab_block_header));
+            ret->header.prvi_slot = (unsigned)ret + sizeof(Slab_block_header);
             ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
             ret->header.broj_slotova /= velicina_slota;
             ret->header.broj_slobodnih_slotova /= ret->header.broj_slotova;
