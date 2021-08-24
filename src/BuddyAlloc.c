@@ -17,7 +17,7 @@ void buddy_inic()
 
 unsigned bajtove_u_min_blokova(unsigned broj_bajtova)
 {
-    return ceil(1.* broj_bajtova / BLOCK_SIZE);
+    return ceil(1. * broj_bajtova / BLOCK_SIZE);
 }
 
 unsigned min_stepen_za_broj_blokova(unsigned broj_blokova)
@@ -43,7 +43,69 @@ unsigned podeli_blok(unsigned index)
     return index - 1;
 }
 
-struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota)
+void premesti_slot(Slab_block *slab_block, unsigned char *iz_praznog_slaba, kmem_cache_t *kes)
+{
+    if (slab_block->header.broj_slobodnih_slotova)
+    {
+        if (*iz_praznog_slaba)
+        {
+            kes->nepun = kes->prazan;
+            kes->prazan = NULL;
+        }
+    }
+    else
+    {
+        Slab_block *next = kes->pun;
+        if (!next)
+        {
+            if (*iz_praznog_slaba)
+            {
+                kes->pun = kes->prazan;
+                kes->prazan = NULL;
+            }
+            else
+            {
+                kes->pun = kes->nepun;
+                kes->nepun = NULL;
+            }
+        }
+        else
+        {
+            while (next->header.sledeci)
+                next = next->header.sledeci;
+            if (*iz_praznog_slaba)
+            {
+                kes->pun = kes->prazan;
+                kes->prazan = NULL;
+            }
+            else
+            {
+                kes->pun = kes->nepun;
+                kes->nepun = NULL;
+            }
+        }
+    }
+}
+
+void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba, kmem_cache_t *kes)
+{
+    unsigned prazan_slot = (unsigned)slab_block->header.prvi_slot;
+
+    for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
+    {
+        prazan_slot += i * slab_block->header.velicina_slota;
+        if (*(char *)prazan_slot == 0)
+        {
+            premesti_slot(slab_block, iz_praznog_slaba, kes);
+            return (void *)prazan_slot;
+        }
+    }
+    return NULL;
+}
+
+void slot_free() {}
+
+struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, kmem_cache_t* moj_kes)
 {
     unsigned potrebno_blokova = bajtove_u_min_blokova(potrebno_bajtova);
     unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
@@ -62,9 +124,11 @@ struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota)
             memset(ret, 0, sizeof(Slab_block));
             ret->header.stepen_dvojke = min_stepen;
             ret->header.velicina_slota = velicina_slota;
-            ret->header.prvi_slot = (void*)((unsigned)ret + sizeof(Slab_block_header));
-            ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke)*BLOCK_SIZE) - sizeof(Slab_block_header);
+            ret->header.prvi_slot = (void *)((unsigned)ret + sizeof(Slab_block_header));
+            ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
             ret->header.broj_slotova /= velicina_slota;
+            ret->header.broj_slobodnih_slotova /= ret->header.broj_slotova;
+            ret->header.moj_kes = moj_kes;
             return ret;
         }
         if (buddy->niz_slobodnih_blokova[sledeci_stepen])

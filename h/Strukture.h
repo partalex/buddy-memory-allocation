@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 // typedef struct kmem_cache_s kmem_cache_t;
-
+typedef struct kmem_cache_s kmem_cache_t;
 #define VELICINA_PAMTLJIVOG (10) // ovo bi trebalo da se izracuna
 // #define velicna_pamtljivog (floor(log2((double)995)) + 1) // ovo bi trebalo da se izracuna
 
@@ -29,7 +29,10 @@ unsigned bajtove_u_min_blokova(unsigned broj_bajtova);
 unsigned min_stepen_za_broj_blokova(unsigned broj_blokova);
 unsigned podeli_blok(unsigned index);
 Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke); // vrati adresu spojenog ili NULL ako nije nasao nista
-struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota);
+void premesti_slot(struct s_Slab_block* slab_block, unsigned char* iz_praznog_slaba, kmem_cache_t* kes);
+void* slot_alloc(struct s_Slab_block* slab_block, unsigned char* iz_praznog_slaba, kmem_cache_t* kes);
+void slot_free();
+struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, kmem_cache_t* moj_kes);
 unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
 
 /////////////////////////////************************/////////////////////////////
@@ -42,7 +45,9 @@ typedef struct s_Slab_block_header
     void *prvi_slot;
     unsigned broj_slotova;
     unsigned velicina_slota;
+    unsigned broj_slobodnih_slotova;
     unsigned short stepen_dvojke;
+    kmem_cache_t* moj_kes;
 } Slab_block_header;
 
 typedef struct s_Slab_block
@@ -52,7 +57,7 @@ typedef struct s_Slab_block
 
 } Slab_block;
 
-typedef struct kmem_cache_s kmem_cache_t;
+
 struct kmem_cache_s
 {
     void (*ctor)(void *);

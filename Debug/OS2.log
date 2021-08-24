@@ -2,16 +2,9 @@
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(14,45): warning C4244: '-=': conversion from 'double' to 'unsigned int', possible loss of data
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(10,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(11,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(20,47): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(20,48): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(25,44): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(62,19): warning C4013: 'memset' undefined; assuming extern returning int
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(72,58): warning C4020: 'podeli_blok': too many actual parameters
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(88,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-  slab.c
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(25,28): warning C4098: 'kmem_cache_destroy': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(33,34): warning C4098: 'kmem_cache_free': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(41,18): warning C4098: 'kfree': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(45,29): warning C4047: 'return': 'int' differs in levels of indirection from 'kmem_cache_t *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(49,20): warning C4098: 'kmem_cache_info': 'void' function returning a value
-  Generating Code...
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(124,19): warning C4013: 'memset' undefined; assuming extern returning int
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(136,58): warning C4020: 'podeli_blok': too many actual parameters
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(152,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
   OS2.vcxproj -> C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\Debug\OS2.exe

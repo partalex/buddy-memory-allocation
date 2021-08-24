@@ -71,8 +71,12 @@ kmem_cache_t *kes_alloc(const char *naziv, size_t velicina, // size je broj blok
     kes->velicina = velicina;
     kes->ctor = ctor;
     kes->dtor = dtor;
+    
+    kes->prazan = zauzmi(pow(2, kes->velicina), kes->velicina,kes);
+    if (!kes->prazan)
+        return NULL;
 
-    return NULL;
+    return kes;
 }
 
 void oslobodi_slabove_kesa(kmem_cache_t *kes)
@@ -111,30 +115,26 @@ void kes_free(kmem_cache_t *kes)
     oslobodi_slabove_kesa(kes);
 }
 
-Slab_block *obezbedi_slab_za_objekat(kmem_cache_t *kes)
+Slab_block *obezbedi_slab_za_objekat(kmem_cache_t *kes, unsigned char* iz_praznog_slaba)
 {
     if (!kes->nepun)
-    {
-        if (!kes->prazan)
-        {
-            kes->nepun = zauzmi(pow(2, kes->velicina), kes->velicina); // vraca prazan blcok
-            if (!kes->nepun)
-                return NULL;
-            return kes->nepun;
+        if (kes->prazan) {
+            *iz_praznog_slaba = 1;
+            return kes->prazan;
         }
-    }
+        else
+            return kes->prazan = zauzmi(pow(2, kes->velicina), kes->velicina,kes);
     return kes->nepun;
 }
 
 void *obj_alloc(kmem_cache_t *kes) // vraca obj tipa koji kes cuva
 {
-    Slab_block *slab_block = obezbedi_slab_za_objekat(kes);
+    unsigned char iz_praznog_slaba = 1;
+    Slab_block *slab_block = obezbedi_slab_za_objekat(kes, &iz_praznog_slaba);
     if (!slab_block)
         return NULL;
-
-
-
-    return NULL;
+    void *slot = slot_alloc(slab_block,&iz_praznog_slaba,kes);
+    return slot;
 }
 
 void obj_free(kmem_cache_t *kes, void *obj)
