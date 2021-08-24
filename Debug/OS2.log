@@ -1,10 +1,13 @@
-﻿  BuddyAlloc.c
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(14,45): warning C4244: '-=': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(10,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(11,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(20,48): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(25,44): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(124,19): warning C4013: 'memset' undefined; assuming extern returning int
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(136,58): warning C4020: 'podeli_blok': too many actual parameters
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(152,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+﻿  SlabAlloc.c
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(23,97): warning C4047: 'function': 'const char *' differs in levels of indirection from 'errno_t'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(23,77): warning C4024: 'strcat_s': different types for formal and actual parameter 3
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(23,98): warning C4047: '=': 'const char *' differs in levels of indirection from 'errno_t'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(17,1): warning C4047: 'initializing': 'char *' differs in levels of indirection from 'int'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(83,47): warning C4244: 'function': conversion from 'double' to 'size_t', possible loss of data
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(134,62): warning C4244: 'function': conversion from 'double' to 'size_t', possible loss of data
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(260,85): warning C4090: 'function': different 'const' qualifiers
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(260,87): warning C4020: 'pronadji_slab_objekta_kog_brises': too many actual parameters
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(260,103): warning C4133: '=': incompatible types - from 'Slab_block *' to 'Kes *'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(261,23): warning C4098: 'buff_free': 'void' function returning a value
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(263,16): warning C4098: 'buff_free': 'void' function returning a value
   OS2.vcxproj -> C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\Debug\OS2.exe

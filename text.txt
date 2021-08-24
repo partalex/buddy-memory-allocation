@@ -1,0 +1,9 @@
+(kes, obj)
+
+provera kesa
+
+naci obj
+    provera da li postoji
+        nepun_slab
+
+        pun_slab
