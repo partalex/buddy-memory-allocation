@@ -107,7 +107,7 @@ void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
 
 void slot_free() {}
 
-struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes)
+Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes)
 {
     unsigned potrebno_blokova = bajtove_u_min_blokova(potrebno_bajtova);
     unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
@@ -129,7 +129,7 @@ struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Ke
             ret->header.prvi_slot = (unsigned)ret + sizeof(Slab_block_header);
             ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
             ret->header.broj_slotova /= velicina_slota;
-            ret->header.broj_slobodnih_slotova /= ret->header.broj_slotova;
+            ret->header.broj_slobodnih_slotova = ret->header.broj_slotova;
             ret->header.moj_kes = moj_kes;
             return ret;
         }

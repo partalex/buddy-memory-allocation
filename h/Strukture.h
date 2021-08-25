@@ -34,7 +34,7 @@ Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_
 void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes);
 void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba);
 void slot_free(Kes *kes);
-struct s_Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes);
+Slab_block*zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes);
 unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
 
 /////////////////////////////************************/////////////////////////////

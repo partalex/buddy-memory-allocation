@@ -19,8 +19,7 @@ void inic_tipske_keseve()
     {
         slab->baferisani_kesevi[i].ctor = NULL;
         slab->baferisani_kesevi[i].dtor = NULL;
-
-        slab->baferisani_kesevi[i].naziv = strcat_s(naziv_start, 10, _itoa_s(i + 5, broj, 1, 10));
+        slab->baferisani_kesevi[i].naziv = naziv_start;
         slab->baferisani_kesevi[i].velicina = i + 5;
 
         slab->baferisani_kesevi[i].prazan = NULL;
