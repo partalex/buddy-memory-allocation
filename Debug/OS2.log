@@ -10,12 +10,6 @@ C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(126,19): warning C4
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(129,78): warning C4047: '=': 'unsigned int *' differs in levels of indirection from 'unsigned int'
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(138,58): warning C4020: 'podeli_blok': too many actual parameters
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\BuddyAlloc.c(154,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-  slab.c
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(25,28): warning C4098: 'kmem_cache_destroy': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(33,34): warning C4098: 'kmem_cache_free': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(41,18): warning C4098: 'kfree': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(45,29): warning C4047: 'return': 'int' differs in levels of indirection from 'Kes *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(49,20): warning C4098: 'kmem_cache_info': 'void' function returning a value
   SlabAlloc.c
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(23,97): warning C4047: 'function': 'const char *' differs in levels of indirection from 'errno_t'
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(23,77): warning C4024: 'strcat_s': different types for formal and actual parameter 3
@@ -24,13 +18,19 @@ C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(17,1): warning C4047
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(83,47): warning C4244: 'function': conversion from 'double' to 'size_t', possible loss of data
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(134,62): warning C4244: 'function': conversion from 'double' to 'size_t', possible loss of data
 C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(156,1): warning C4047: 'initializing': 'unsigned int' differs in levels of indirection from 'unsigned int *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(185,42): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'int'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(185,41): warning C4024: 'slot_alloc': different types for formal and actual parameter 2
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(185,44): warning C4020: 'slot_alloc': too many actual parameters
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(282,85): warning C4090: 'function': different 'const' qualifiers
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(282,87): warning C4020: 'pronadji_slab_objekta_kog_brises': too many actual parameters
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(282,103): warning C4133: '=': incompatible types - from 'Slab_block *' to 'Kes *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(283,23): warning C4098: 'buff_free': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(285,16): warning C4098: 'buff_free': 'void' function returning a value
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(186,42): warning C4047: 'function': 'unsigned char *' differs in levels of indirection from 'int'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(186,41): warning C4024: 'slot_alloc': different types for formal and actual parameter 2
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(186,44): warning C4020: 'slot_alloc': too many actual parameters
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(284,85): warning C4090: 'function': different 'const' qualifiers
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(284,87): warning C4020: 'pronadji_slab_objekta_kog_brises': too many actual parameters
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(284,103): warning C4133: '=': incompatible types - from 'Slab_block *' to 'Kes *'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(285,23): warning C4098: 'buff_free': 'void' function returning a value
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(287,16): warning C4098: 'buff_free': 'void' function returning a value
+  slab.c
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(25,28): warning C4098: 'kmem_cache_destroy': 'void' function returning a value
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(33,34): warning C4098: 'kmem_cache_free': 'void' function returning a value
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(41,18): warning C4098: 'kfree': 'void' function returning a value
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(45,29): warning C4047: 'return': 'int' differs in levels of indirection from 'Kes *'
+C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\slab.c(49,20): warning C4098: 'kmem_cache_info': 'void' function returning a value
   Generating Code...
   OS2.vcxproj -> C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\Debug\OS2.exe

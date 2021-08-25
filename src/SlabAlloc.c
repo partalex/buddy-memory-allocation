@@ -169,28 +169,30 @@ Slab_block *obrisi_objekt_u_slabu(Slab_block *slab_block, void *obj)
 }
 
 void preuredi_nepune_slabove(Kes *kes)
-
 {
-    Slab_block* prvi = kes->nepun;
-    Slab_block* drugi = kes->nepun->header.sledeci;
-    void* slot;
+    Slab_block *prvi = kes->nepun;
+    Slab_block *drugi = kes->nepun->header.sledeci;
+    void *slot;
 
-    if (!drugi) {
+    if (!drugi)
+    {
         return; // ima samo jedan nepun, nema smisla premestati
         if (prvi->header.broj_slobodnih_slotova + drugi->header.broj_slobodnih_slotova > prvi->header.broj_slotova)
             return;
         for (size_t i = 0; i < drugi->header.broj_slobodnih_slotova; i++)
         {
-            if (*(char*)(drugi->header.prvi_slot + i * drugi->header.velicina_slota) != 0) {
+            if (*(char *)(drugi->header.prvi_slot + i * drugi->header.velicina_slota) != 0)
+            {
                 slot = slot_alloc(prvi, 3, kes);
                 if (!slot)
                     printf("problem");
             }
         }
     }
-    else {
+    else
+    {
         prvi->header.sledeci = NULL;
-        oslobodi((Buddy_block*)drugi, drugi->header.stepen_dvojke);
+        oslobodi((Buddy_block *)drugi, drugi->header.stepen_dvojke);
     }
 }
 

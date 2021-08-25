@@ -7,7 +7,6 @@ typedef struct kmem_cache_s kmem_cache_t;
 #define BLOCK_SIZE (4096)
 #define CACHE_L1_LINE_SIZE (64)
 
-
 void kmem_init(void *space, int block_num)
 {
     slab_inic(space, block_num); // static slab je inicijalizovan

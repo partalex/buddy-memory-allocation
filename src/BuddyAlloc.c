@@ -43,7 +43,7 @@ unsigned podeli_blok(unsigned index)
     return index - 1;
 }
 
-void premesti_slab (Slab_block* slab_block, unsigned char* iz_praznog_slaba, Kes* kes)
+void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes)
 {
     if (slab_block->header.broj_slobodnih_slotova)
     {
@@ -97,7 +97,7 @@ void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
         if (*(char *)prazan_slot == 0)
         {
             slab_block->header.broj_slobodnih_slotova--;
-            if(*iz_praznog_slaba !=2) // kad je poziva f-ja preuredi
+            if (*iz_praznog_slaba != 2) // kad je poziva f-ja preuredi
                 premesti_slab(slab_block, iz_praznog_slaba, slab_block->header.moj_kes);
             return (void *)prazan_slot;
         }

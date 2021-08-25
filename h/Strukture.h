@@ -44,7 +44,7 @@ unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca 
 typedef struct s_Slab_block_header
 {
     struct s_Slab_block *sledeci;
-    unsigned*prvi_slot;
+    unsigned *prvi_slot;
     unsigned broj_slotova;
     unsigned velicina_slota;
     unsigned broj_slobodnih_slotova;
@@ -91,24 +91,24 @@ Buddy *buddy;
 // enkapsulirane f-je
 
 void slab_inic(void *pocetna_adresa, unsigned ukupan_broj_blokova);
-Kes* kes_alloc(const char *naziv, size_t velicina, // size je broj blokova ili velcina objekta tog tog tipa
-                        void (*ctor)(void *), void (*dtor)(void *));
+Kes *kes_alloc(const char *naziv, size_t velicina, // size je broj blokova ili velcina objekta tog tog tipa
+               void (*ctor)(void *), void (*dtor)(void *));
 void kes_free(Kes *kes);
 void *obj_alloc(Kes *kes); // vraca obj tipa koji kes `cuva
 void obj_free(Kes *kes, void *obj);
 void *buff_alloc(size_t size);
 void buff_free(const void *buff); // nemam kontrolu pogresnog unosa
-Kes*skupi_kes(Kes *kes);
+Kes *skupi_kes(Kes *kes);
 void kes_info(Kes *kes);
 int kes_error(Kes *kes);
 
 // moje pomocne f-je
-int index_tipskog_kesa(Kes* kes);
+int index_tipskog_kesa(Kes *kes);
 void inic_baferske_keseve(Kes *prvi_kes, unsigned broj_keseva);
 void inic_tipske_keseve();
 Kes *daj_prazno_mesto_za_kes();
 void oslobodi_slabove_kesa(Kes *kes);
-Slab_block* obezbedi_slab_za_objekat(Kes* kes, unsigned char* iz_praznog_slaba);
-void preuredi_nepune_slabove(Kes* kes);
-Slab_block* pronadji_slab_objekta_kog_brises(Kes* kes, void* obj);
-Slab_block* obrisi_objekt_u_slabu(Slab_block* slab_block, void* obj);
+Slab_block *obezbedi_slab_za_objekat(Kes *kes, unsigned char *iz_praznog_slaba);
+void preuredi_nepune_slabove(Kes *kes);
+Slab_block *pronadji_slab_objekta_kog_brises(Kes *kes, void *obj);
+Slab_block *obrisi_objekt_u_slabu(Slab_block *slab_block, void *obj);
