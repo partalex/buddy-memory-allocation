@@ -34,7 +34,7 @@ Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_
 void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes);
 void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba);
 void slot_free(Kes *kes);
-Slab_block*zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes);
+Slab_block*zauzmi(Kes *moj_kes);
 unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
 
 /////////////////////////////************************/////////////////////////////
@@ -90,7 +90,7 @@ Buddy *buddy;
 
 // enkapsulirane f-je
 
-void slab_inic(void *pocetna_adresa, unsigned ukupan_broj_blokova);
+void slab_inic(uintptr_t pocetna_adresa, unsigned ukupan_broj_blokova);
 Kes *kes_alloc(const char *naziv, size_t velicina, // size je broj blokova ili velcina objekta tog tog tipa
                void (*ctor)(void *), void (*dtor)(void *));
 void kes_free(Kes *kes);
@@ -104,7 +104,7 @@ int kes_error(Kes *kes);
 
 // moje pomocne f-je
 int index_tipskog_kesa(Kes *kes);
-void inic_baferske_keseve(Kes *prvi_kes, unsigned broj_keseva);
+void inic_baferske_keseve();
 void inic_tipske_keseve();
 Kes *daj_prazno_mesto_za_kes();
 void oslobodi_slabove_kesa(Kes *kes);

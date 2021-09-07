@@ -81,6 +81,7 @@ void work(void *pdata)
 int main()
 {
 	void *space = malloc(BLOCK_SIZE * BLOCK_NUMBER);
+	int* pok = (int*)space;
 	kmem_init(space, BLOCK_NUMBER);
 	kmem_cache_t *shared = kmem_cache_create("shared object", shared_size, construct, NULL);
 

@@ -11,48 +11,35 @@ int index_tipskog_kesa(Kes *kes)
     return -1;
 }
 
-void inic_tipske_keseve()
+void inic_baferske_keseve()
 {
     char *naziv_start = "Mem Buffer ";
-    char *broj = 3;
     for (size_t i = 0; i < 13; i++)
     {
-        slab->baferisani_kesevi[i].ctor = NULL;
-        slab->baferisani_kesevi[i].dtor = NULL;
+        memset(&slab->baferisani_kesevi[i], 0, sizeof(Kes));
         slab->baferisani_kesevi[i].naziv = naziv_start;
         slab->baferisani_kesevi[i].velicina = i + 5;
-
-        slab->baferisani_kesevi[i].prazan = NULL;
-        slab->baferisani_kesevi[i].nepun = NULL;
-        slab->baferisani_kesevi[i].pun = NULL;
-
-        slab->baferisani_kesevi[i].sledeci = NULL;
     }
 }
 
-void inic_baferske_keseve(Kes *prvi_kes, unsigned broj_keseva)
-{
-    kmem_cache_t *temp = prvi_kes;
-    for (size_t i = 0; i < broj_keseva; i++)
-    {
-        memset(temp, 0, sizeof(kmem_cache_t));
-        temp++;
-    }
+void inic_tipske_keseve(){
+    memset(slab->ulancani_kesevi , 0, sizeof(Kes) * BROJ_TIPSKIH_KESEVA);
 }
 
-void slab_inic(void *pocetna_adresa, unsigned ukupan_broj_blokova)
+void slab_inic(uintptr_t pocetna_adresa, unsigned ukupan_broj_blokova)
 {
     slab = (Slab *)pocetna_adresa;
-    inic_tipske_keseve();
+    inic_baferske_keseve();
 
-    slab->ulancani_kesevi = (kmem_cache_t *)((unsigned)pocetna_adresa + sizeof(Slab)); // prazna lista keseva
-    inic_baferske_keseve(slab->ulancani_kesevi, BROJ_TIPSKIH_KESEVA);
+    slab->ulancani_kesevi = (Kes *)(pocetna_adresa + sizeof(Slab)); // prazna lista keseva
+    inic_tipske_keseve();
     memset(slab->niz_napravljenih_keseva, 0, BROJ_TIPSKIH_KESEVA * sizeof(unsigned char));
 
     slab->buddy.broj_blokova = (unsigned)(ukupan_broj_blokova - (unsigned)ceil((sizeof(Slab) * 1.) / BLOCK_SIZE)); // ova linija moze da bude promeljiva
-    slab->buddy.pocetna_adesa = (Buddy *)((unsigned)pocetna_adresa + (unsigned)ceil(((sizeof(Slab) + BROJ_TIPSKIH_KESEVA * sizeof(kmem_cache_t)) * 1. / BLOCK_SIZE)));
+    slab->buddy.pocetna_adesa = (Buddy *)(pocetna_adresa + (uintptr_t)ceil(((sizeof(Slab) + BROJ_TIPSKIH_KESEVA * sizeof(kmem_cache_t)) * 1. / BLOCK_SIZE)));
 
     buddy = &slab->buddy;
+    memset(buddy->niz_slobodnih_blokova, 0, VELICINA_PAMTLJIVOG * sizeof(Buddy_block*));
     buddy_inic();
 }
 
@@ -79,7 +66,7 @@ Kes *kes_alloc(const char *naziv, size_t velicina, // size je broj blokova ili v
     kes->ctor = ctor;
     kes->dtor = dtor;
 
-    kes->prazan = zauzmi(pow(2, kes->velicina), kes->velicina, kes);
+    kes->prazan = zauzmi(kes);
     if (!kes->prazan)
         return NULL;
 
@@ -130,7 +117,7 @@ Slab_block *obezbedi_slab_za_objekat(Kes *kes, unsigned char *iz_praznog_slaba)
             return kes->prazan;
         }
         else
-            return kes->prazan = zauzmi(pow(2, kes->velicina), kes->velicina, kes);
+            return kes->prazan = zauzmi(kes);
     return kes->nepun;
 }
 
@@ -152,7 +139,7 @@ void *obj_alloc(Kes *kes) // vraca obj tipa koji kes cuva
 
 Slab_block *obrisi_objekt_u_slabu(Slab_block *slab_block, void *obj)
 {
-    unsigned prazan_slot = slab_block->header.prvi_slot;
+    uintptr_t prazan_slot = slab_block->header.prvi_slot;
     for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
     {
         prazan_slot += i * slab_block->header.velicina_slota;

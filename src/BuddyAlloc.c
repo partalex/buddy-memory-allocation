@@ -4,13 +4,22 @@
 
 void buddy_inic()
 {
+    uintptr_t adress = buddy->pocetna_adesa;
     unsigned nedodeljeni_blokovi = buddy->broj_blokova;
     while (nedodeljeni_blokovi)
     {
         unsigned index = floor(log2((double)nedodeljeni_blokovi));
-        unsigned adress = (unsigned)(buddy->pocetna_adesa) + pow(2, index) * BLOCK_SIZE;
-        buddy->niz_slobodnih_blokova[index] = (Buddy_block *)adress;
-        buddy->niz_slobodnih_blokova[index]->sledeci = NULL;
+        adress +=  (uintptr_t)(pow(2, index) * BLOCK_SIZE);
+        Buddy_block* next = buddy->niz_slobodnih_blokova[index];
+        if (!next) {
+            buddy->niz_slobodnih_blokova[index] = (Buddy_block*)adress;
+            buddy->niz_slobodnih_blokova[index]->sledeci = NULL;
+        }
+        else {
+            while (next->sledeci) 
+                next = next->sledeci;
+            next->sledeci = adress;
+        }
         nedodeljeni_blokovi -= pow(2, index);
     }
 }
@@ -107,15 +116,23 @@ void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
 
 void slot_free() {}
 
-Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_kes)
+Slab_block *zauzmi(Kes *moj_kes)
 {
-    unsigned potrebno_blokova = bajtove_u_min_blokova(potrebno_bajtova);
+    unsigned potrebno_blokova = bajtove_u_min_blokova(moj_kes->velicina);
     unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
     Buddy_block *slobodan = NULL;
     Slab_block *ret;
 
+    //unsigned sledeci_stepen = min_stepen;
     unsigned sledeci_stepen = min_stepen;
-    while (sledeci_stepen < VELICINA_PAMTLJIVOG)
+    while (sledeci_stepen < VELICINA_PAMTLJIVOG) {
+        if (buddy->niz_slobodnih_blokova[sledeci_stepen])
+            break;
+        sledeci_stepen++;
+    }
+    if (sledeci_stepen == VELICINA_PAMTLJIVOG)
+        return NULL; // nema slobodnih
+    while (sledeci_stepen < VELICINA_PAMTLJIVOG) // radi deobu
     {
         if (sledeci_stepen == min_stepen)
         {
@@ -125,23 +142,15 @@ Slab_block *zauzmi(size_t potrebno_bajtova, unsigned velicina_slota, Kes *moj_ke
             ret = (Slab_block *)slobodan;
             memset(ret, 0, sizeof(Slab_block));
             ret->header.stepen_dvojke = min_stepen;
-            ret->header.velicina_slota = velicina_slota;
+            ret->header.velicina_slota = moj_kes->velicina;
             ret->header.prvi_slot = (unsigned)ret + sizeof(Slab_block_header);
             ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
-            ret->header.broj_slotova /= velicina_slota;
+            ret->header.broj_slotova /= moj_kes->velicina;
             ret->header.broj_slobodnih_slotova = ret->header.broj_slotova;
             ret->header.moj_kes = moj_kes;
             return ret;
         }
-        if (buddy->niz_slobodnih_blokova[sledeci_stepen])
-        {
-            sledeci_stepen = podeli_blok(sledeci_stepen, buddy);
-            continue;
-        }
-        else
-        {
-            sledeci_stepen++;
-        }
+        sledeci_stepen = podeli_blok(sledeci_stepen);
     }
     return NULL;
 }
