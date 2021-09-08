@@ -1,27 +1,9 @@
-﻿  BuddyAlloc.c
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(21,35): warning C4047: '=': 's_Buddy_block *' differs in levels of indirection from 'uintptr_t'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(23,45): warning C4244: '-=': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(7,1): warning C4047: 'initializing': 'uintptr_t' differs in levels of indirection from 'void *'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(11,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(29,48): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(34,44): warning C4244: 'return': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(46,69): warning C4311: 'type cast': pointer truncation from 'Buddy_block *' to 'unsigned int'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(46,114): warning C4312: 'type cast': conversion from 'unsigned int' to 'Buddy_block *' of greater size
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(105,61): warning C4267: '+=': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(106,34): warning C4312: 'type cast': conversion from 'unsigned int' to 'char *' of greater size
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(111,39): warning C4312: 'type cast': conversion from 'unsigned int' to 'void *' of greater size
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(101,1): warning C4047: 'initializing': 'unsigned int' differs in levels of indirection from 'unsigned int *'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(117,18): warning C4026: function declared with formal parameter list
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(143,19): warning C4013: 'memset' undefined; assuming extern returning int
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(146,51): warning C4311: 'type cast': pointer truncation from 'Slab_block *' to 'unsigned int'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(146,78): warning C4047: '=': 'unsigned int *' differs in levels of indirection from 'size_t'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(163,44): warning C4244: 'function': conversion from 'size_t' to 'double', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(164,54): warning C4311: 'type cast': pointer truncation from 'Buddy_block *' to 'unsigned int'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(165,54): warning C4311: 'type cast': pointer truncation from 'Buddy_block *' to 'unsigned int'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(169,28): warning C4311: 'type cast': pointer truncation from 'Buddy_block *' to 'unsigned int'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(174,33): warning C4311: 'type cast': pointer truncation from 'Buddy_block *' to 'unsigned int'
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(204,60): warning C4312: 'type cast': conversion from 'unsigned int' to 'Buddy_block *' of greater size
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(206,51): warning C4312: 'type cast': conversion from 'unsigned int' to 'Buddy_block *' of greater size
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(163,1): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\BuddyAlloc.c(219,25): warning C4267: 'return': conversion from 'size_t' to 'unsigned int', possible loss of data
+﻿  SlabAlloc.c
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(10,12): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(21,46): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(65,26): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(165,8): warning C4101: 'slot': unreferenced local variable
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(265,51): warning C4267: 'function': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(276,79): warning C4090: 'function': different 'const' qualifiers
+C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(276,80): warning C4133: '=': incompatible types - from 'Slab_block *' to 'Kes *'
   OS2.vcxproj -> C:\Users\kaoko\Documents\GitHub\OS2\x64\Debug\OS2.exe

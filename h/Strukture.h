@@ -44,7 +44,7 @@ unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca 
 typedef struct s_Slab_block_header
 {
     struct s_Slab_block *sledeci;
-    unsigned *prvi_slot;
+    uintptr_t prvi_slot;
     unsigned broj_slotova;
     unsigned velicina_slota;
     unsigned broj_slobodnih_slotova;

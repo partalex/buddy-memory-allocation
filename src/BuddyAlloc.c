@@ -19,6 +19,8 @@ void buddy_inic()
             while (next->sledeci) 
                 next = next->sledeci;
             next->sledeci = adress;
+            next->sledeci->sledeci = NULL;
+
         }
         nedodeljeni_blokovi -= pow(2, index);
     }
@@ -37,17 +39,21 @@ unsigned min_stepen_za_broj_blokova(unsigned broj_blokova)
 unsigned podeli_blok(unsigned index)
 {
     Buddy_block *prvi_buddy = buddy->niz_slobodnih_blokova[index]; // uzmi prvi koji se deli
-    buddy->niz_slobodnih_blokova[index] = prvi_buddy->sledeci;     // izbaci onaj kog delim
+    buddy->niz_slobodnih_blokova[index] = prvi_buddy->sledeci;     // izbaci onog kog delim
 
     Buddy_block *next = buddy->niz_slobodnih_blokova[index - 1];
-    while (next->sledeci)
-        next = next->sledeci;
-    next->sledeci = prvi_buddy;
-    Buddy_block *drugi_buddy = (Buddy_block *)((unsigned)prvi_buddy + (unsigned)(pow(2, index - 1) * BLOCK_SIZE));
+    if (!next)
+        buddy->niz_slobodnih_blokova[index - 1] = prvi_buddy;
+    else {
+        while (next->sledeci)
+            next = next->sledeci;
+        next->sledeci = prvi_buddy;
+    }
+
+    Buddy_block *drugi_buddy = (Buddy_block *)((uintptr_t)prvi_buddy + (unsigned)(pow(2, index - 1) * BLOCK_SIZE));
 
     prvi_buddy->sledeci = drugi_buddy;
 
-    buddy->niz_slobodnih_blokova[index - 1];
 
     return index - 1;
 }
@@ -98,7 +104,7 @@ void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes 
 
 void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
 {
-    unsigned prazan_slot = slab_block->header.prvi_slot;
+    uintptr_t prazan_slot = slab_block->header.prvi_slot;
 
     for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
     {
@@ -108,7 +114,7 @@ void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
             slab_block->header.broj_slobodnih_slotova--;
             if (*iz_praznog_slaba != 2) // kad je poziva f-ja preuredi
                 premesti_slab(slab_block, iz_praznog_slaba, slab_block->header.moj_kes);
-            return (void *)prazan_slot;
+            return prazan_slot;
         }
     }
     return NULL;
@@ -143,10 +149,11 @@ Slab_block *zauzmi(Kes *moj_kes)
             memset(ret, 0, sizeof(Slab_block));
             ret->header.stepen_dvojke = min_stepen;
             ret->header.velicina_slota = moj_kes->velicina;
-            ret->header.prvi_slot = (unsigned)ret + sizeof(Slab_block_header);
+            ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header);
             ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
             ret->header.broj_slotova /= moj_kes->velicina;
             ret->header.broj_slobodnih_slotova = ret->header.broj_slotova;
+            memset(ret->header.prvi_slot, 0, ret->header.broj_slobodnih_slotova * ret->header.velicina_slota);
             ret->header.moj_kes = moj_kes;
             return ret;
         }
