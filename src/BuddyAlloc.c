@@ -122,12 +122,10 @@ void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba)
 
 void slot_free() {}
 
-Slab_block *zauzmi(Kes *moj_kes)
+Slab_block *slab_alloc(Kes *moj_kes)
 {
     unsigned potrebno_blokova = bajtove_u_min_blokova(moj_kes->velicina);
     unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
-    Buddy_block *slobodan = NULL;
-    Slab_block *ret;
 
     //unsigned sledeci_stepen = min_stepen;
     unsigned sledeci_stepen = min_stepen;
@@ -142,10 +140,10 @@ Slab_block *zauzmi(Kes *moj_kes)
     {
         if (sledeci_stepen == min_stepen)
         {
-            slobodan = buddy->niz_slobodnih_blokova[min_stepen];
+            Buddy_block* slobodan = buddy->niz_slobodnih_blokova[min_stepen];
             buddy->niz_slobodnih_blokova[min_stepen] = slobodan->sledeci;
             slobodan->sledeci = NULL;
-            ret = (Slab_block *)slobodan;
+            Slab_block* ret = (Slab_block *)slobodan;
             memset(ret, 0, sizeof(Slab_block));
             ret->header.stepen_dvojke = min_stepen;
             ret->header.velicina_slota = moj_kes->velicina;

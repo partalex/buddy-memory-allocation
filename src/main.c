@@ -16,20 +16,16 @@ void construct(void *data)
 	static int i = 1;
 	printf_s("%d Shared object constructed.\n", i++);
 	memset(data, MASK, shared_size);
+	unsigned char* proba = data;
+	proba[0];
 }
 
 int check(void *data, size_t size)
 {
-	int ret = 1;
 	for (int i = 0; i < size; i++)
-	{
 		if (((unsigned char *)data)[i] != MASK)
-		{
-			ret = 0;
-		}
-	}
-
-	return ret;
+			return 0;
+	return 1;
 }
 
 struct objects_s
@@ -54,7 +50,7 @@ void work(void *pdata)
 		{
 			objs[size].data = kmem_cache_alloc(data.shared);
 			objs[size].cache = data.shared;
-			assert(check(objs[size].data, shared_size));
+ 			assert(check(objs[size].data, shared_size));
 		}
 		else
 		{

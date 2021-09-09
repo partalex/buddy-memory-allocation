@@ -1,9 +1,2 @@
-﻿  SlabAlloc.c
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(10,12): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(21,46): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(65,26): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(165,8): warning C4101: 'slot': unreferenced local variable
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(265,51): warning C4267: 'function': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(276,79): warning C4090: 'function': different 'const' qualifiers
-C:\Users\kaoko\Documents\GitHub\OS2\src\SlabAlloc.c(276,80): warning C4133: '=': incompatible types - from 'Slab_block *' to 'Kes *'
-  OS2.vcxproj -> C:\Users\kaoko\Documents\GitHub\OS2\x64\Debug\OS2.exe
+﻿  main.c
+  OS2.vcxproj -> C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\x64\Debug\OS2.exe

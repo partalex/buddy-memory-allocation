@@ -2,6 +2,7 @@
     "files.associations": {
         "slaballoc.h": "c",
         "strukture.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "slab.h": "c"
     }
 }

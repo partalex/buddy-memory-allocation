@@ -66,7 +66,7 @@ Kes* kes_alloc(const char* naziv, size_t velicina, // size je broj blokova ili v
 	kes->ctor = ctor;
 	kes->dtor = dtor;
 
-	kes->prazan = zauzmi(kes);
+	kes->prazan = slab_alloc(kes);
 	if (!kes->prazan)
 		return NULL;
 
@@ -117,7 +117,7 @@ Slab_block* obezbedi_slab_za_objekat(Kes* kes, unsigned char* iz_praznog_slaba)
 			return kes->prazan;
 		}
 		else
-			return kes->prazan = zauzmi(kes);
+			return kes->prazan = slab_alloc(kes);
 	return kes->nepun;
 }
 
