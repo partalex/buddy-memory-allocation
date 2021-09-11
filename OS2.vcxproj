@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="h\lockic.h" />
     <ClInclude Include="h\Strukture.h" />
     <ClInclude Include="h\slab.h" />
     <ClInclude Include="test\test.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="lockic.c" />
     <ClCompile Include="src\BuddyAlloc.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\slab.c" />

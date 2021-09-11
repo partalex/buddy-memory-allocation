@@ -71,7 +71,7 @@ void work(void* pdata)
 
 	}
 
-	kfree(objs); // ne radi ova f-ja
+	kfree(objs);
 	kmem_cache_destroy(cache);
 }
 

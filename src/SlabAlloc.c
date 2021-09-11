@@ -1,6 +1,8 @@
 #include <string.h>
 #include "../h/slab.h"
 #include "../h/Strukture.h"
+#include "../h/lockic.h"
+
 #define BLOCK_SIZE (4096)
 
 int index_tipskog_kesa(Kes* kes)
@@ -30,6 +32,7 @@ void slab_inic(uintptr_t pocetna_adresa, unsigned ukupan_broj_blokova)
 {
 	slab = (Slab*)pocetna_adresa;
 	inic_baferske_keseve();
+	slab->mutex = create_mutex();
 
 	slab->ulancani_kesevi = (Kes*)(pocetna_adresa + sizeof(Slab)); // prazna lista keseva
 	inic_tipske_keseve();
@@ -139,7 +142,7 @@ Slab_block* obezbedi_slab_za_buff_obj(Kes* kes) {
 void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
 	if (index_tipskog_kesa(kes) == -1)
-		return NULL;
+		return NULL; // greska 
 	unsigned char iz_praznog_slaba = 1;
 	Slab_block* slab_block = obezbedi_slab_za_typed_obj(kes, &iz_praznog_slaba);
 	if (!slab_block)
@@ -151,7 +154,6 @@ void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 		kes->ctor(slot);
 	return slot;
 }
-
 
 void* obj_buffer_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {

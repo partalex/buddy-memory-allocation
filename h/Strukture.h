@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <windows.h>
 
 // typedef struct kmem_cache_s kmem_cache_t;
 typedef struct kmem_cache_s kmem_cache_t;
@@ -24,6 +25,7 @@ typedef struct
     uintptr_t pocetna_adesa; 
     Buddy_block *niz_slobodnih_blokova[VELICINA_PAMTLJIVOG];
     unsigned broj_blokova;
+    HANDLE mutex;
 } Buddy;
 
 void buddy_inic();
@@ -71,6 +73,7 @@ struct kmem_cache_s
     Slab_block *pun;
 
     Kes *sledeci; // pokazivac
+    HANDLE mutex;
 };
 
 #define BROJ_KESEVA_ZA_BAFERE (13)
@@ -83,7 +86,7 @@ typedef struct s_Slab
     Kes baferisani_kesevi[BROJ_KESEVA_ZA_BAFERE];
     Kes *ulancani_kesevi; // nalazi se na mestu ispod slaba da moze se redja
     unsigned char niz_napravljenih_keseva[BROJ_TIPSKIH_KESEVA];
-
+    HANDLE mutex;
 } Slab;
 
 Slab *slab;

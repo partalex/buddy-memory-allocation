@@ -1,9 +1,11 @@
 #include "../h/slab.h"
 #include "../h/Strukture.h"
+#include "../h/lockic.h"
 #include <math.h>
 
 void buddy_inic()
 {
+	buddy->mutex = create_mutex();
 	uintptr_t adress = buddy->pocetna_adesa;
 	unsigned nedodeljeni_blokovi = buddy->broj_blokova;
 	while (nedodeljeni_blokovi)
