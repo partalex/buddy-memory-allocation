@@ -70,7 +70,7 @@ void work(void *pdata)
 		kmem_cache_free(objs[i].cache, objs[i].data);
 	}
 
-	kfree(objs);
+	kfree(objs); // ne radi ova f-ja
 	kmem_cache_destroy(cache);
 }
 
@@ -84,9 +84,10 @@ int main()
 	struct data_s data;
 	data.shared = shared;
 	data.iterations = ITERATIONS;
-	run_threads(work, &data, THREAD_NUM);
+ 	run_threads(work, &data, THREAD_NUM);
 
 	kmem_cache_destroy(shared);
+
 	free(space);
 	return 0;
 }

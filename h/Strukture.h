@@ -21,7 +21,7 @@ typedef struct s_Buddy_block
 
 typedef struct
 {
-    void *pocetna_adesa;
+    uintptr_t pocetna_adesa; 
     Buddy_block *niz_slobodnih_blokova[VELICINA_PAMTLJIVOG];
     unsigned broj_blokova;
 } Buddy;
@@ -34,7 +34,9 @@ Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_
 void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes);
 void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba);
 void slot_free(Kes *kes);
-Slab_block*slab_alloc(Kes *moj_kes);
+void slab_info(Slab_block* slab_block);
+Slab_block*slab_alloc_typed(Kes *moj_kes); 
+Slab_block* slab_alloc_buffered(Kes *moj_kes);
 unsigned oslobodi(Buddy_block *buddy_block, size_t pottrebno_bajtova); // vraca stepen dvojke oslobodjenog(mergovanog) bloka
 
 /////////////////////////////************************/////////////////////////////
@@ -94,7 +96,8 @@ void slab_inic(uintptr_t pocetna_adresa, unsigned ukupan_broj_blokova);
 Kes *kes_alloc(const char *naziv, size_t velicina, // size je broj blokova ili velcina objekta tog tog tipa
                void (*ctor)(void *), void (*dtor)(void *));
 void kes_free(Kes *kes);
-void *obj_alloc(Kes *kes); // vraca obj tipa koji kes `cuva
+void *obj_type_alloc(Kes *kes); // vraca obj tipa koji kes cuva
+void *obj_buffer_alloc(Kes *kes); // vraca obj buffer-a koji kes cuva
 void obj_free(Kes *kes, void *obj);
 void *buff_alloc(size_t size);
 void buff_free(const void *buff); // nemam kontrolu pogresnog unosa
@@ -108,7 +111,7 @@ void inic_baferske_keseve();
 void inic_tipske_keseve();
 Kes *daj_prazno_mesto_za_kes();
 void oslobodi_slabove_kesa(Kes *kes);
-Slab_block *obezbedi_slab_za_objekat(Kes *kes, unsigned char *iz_praznog_slaba);
+Slab_block *obezbedi_slab_za_typed_obj(Kes *kes, unsigned char *iz_praznog_slaba);
 void preuredi_nepune_slabove(Kes *kes);
 Slab_block *pronadji_slab_objekta_kog_brises(Kes *kes, void *obj);
 Slab_block *obrisi_objekt_u_slabu(Slab_block *slab_block, void *obj);
