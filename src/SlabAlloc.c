@@ -86,6 +86,7 @@ void oslobodi_slabove_kesa(Kes* kes)
 		next = next->header.sledeci;
 		oslobodi((Buddy_block*)za_oslobadjanje, za_oslobadjanje->header.stepen_dvojke);
 	}
+
 	next = kes->pun;
 	while (next)
 	{
@@ -100,6 +101,9 @@ void oslobodi_slabove_kesa(Kes* kes)
 		next = next->header.sledeci;
 		oslobodi((Buddy_block*)za_oslobadjanje, za_oslobadjanje->header.stepen_dvojke);
 	}
+	kes->prazan = NULL;
+	kes->nepun = NULL;
+	kes->pun = NULL;
 }
 
 void kes_free(Kes* kes)
@@ -148,13 +152,16 @@ void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 	return slot;
 }
 
+
 void* obj_buffer_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
 	Slab_block* slab_block = obezbedi_slab_za_buff_obj(kes);
 	if (!slab_block)
 		return NULL;
-	void* slot = slab_block->header.prvi_slot;
-	slab_block->header.broj_slobodnih_slotova--;
+	short iz_praznog_slaba = 1;
+	void* slot = slot_alloc(slab_block, &iz_praznog_slaba);
+	if (!slot)
+		return NULL;
 	return slot;
 }
 
@@ -163,7 +170,6 @@ Slab_block* obrisi_objekt_u_slabu(Slab_block* slab_block, void* obj)
 	uintptr_t prazan_slot = slab_block->header.prvi_slot;
 	for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
 	{
-		//if (!memcmp(prazan_slot, obj, slab_block->header.velicina_slota))
 		if (obj == (void*)prazan_slot)
 		{
 			if (slab_block->header.moj_kes->dtor)
@@ -177,87 +183,102 @@ Slab_block* obrisi_objekt_u_slabu(Slab_block* slab_block, void* obj)
 	return NULL;
 }
 
-void preuredi_nepune_slabove(Kes* kes)
-{
-	return NULL;
-	Slab_block* prvi = kes->nepun;
-	Slab_block* drugi = kes->nepun->header.sledeci;
-	void* slot;
-
-	if (!drugi)
-	{
-		return; // ima samo jedan nepun, nema smisla premestati
-		if (prvi->header.broj_slobodnih_slotova + drugi->header.broj_slobodnih_slotova > prvi->header.broj_slotova)
-			return;
-		for (size_t i = 0; i < drugi->header.broj_slobodnih_slotova; i++)
-		{
-			if (*(char*)(drugi->header.prvi_slot + i * drugi->header.velicina_slota) != 0)
-			{
-				/*slot = slot_alloc(prvi, 3, kes);
-				if (!slot)
-					printf("problem");*/
-				exit(1);
-			}
-		}
-	}
-	else
-	{
-		prvi->header.sledeci = NULL;
-		oslobodi((Buddy_block*)drugi, drugi->header.stepen_dvojke);
-	}
-}
-
 Slab_block* pronadji_slab_objekta_kog_brises(Kes* kes, void* obj)
 {
 	Slab_block* ret = NULL;
 	Slab_block* next;
 	Slab_block* prev = NULL;
 	next = kes->pun;
-	while (next) // pretrazuje  
-	{
+	while (next)
+	{ // pretrazuje pune
 		if (ret = obrisi_objekt_u_slabu(next, obj))
-		{
-			if (prev)
-			{
-				prev->header.sledeci = next->header.sledeci;
-				prev = kes->nepun;
-				if (!prev)
-					kes->nepun = next;
-				else
-				{
-					while (prev->header.sledeci)
-						prev = prev->header.sledeci;
-					prev->header.sledeci = next;
-				}
+		{ // nasao slab objekta kojeg izbacuje
+			if (prev) // pun slab ima prethodnika u listi
+				prev->header.sledeci = ret->header.sledeci; // izbacen iz liste punih
+			else // pun slab nema prethnodnika u listi
+				kes->pun = ret->header.sledeci; // izbacen iz liste punih
+			if (ret->header.broj_slobodnih_slotova == ret->header.broj_slotova)
+			{ // prazan je, treba ga staviti u prazne slabove
+				if (kes->prazan)
+					ret->header.sledeci = kes->prazan;
+				kes->prazan = ret;
+				return ret;
 			}
 			else
-			{
-				kes->pun = NULL;
-				prev = kes->nepun;
-				if (!prev)
-					kes->nepun = next;
-				else
-				{
-					while (prev->header.sledeci)
-						prev = prev->header.sledeci;
-					prev->header.sledeci = next;
+			{ // nije prazan, treba ga ubaciti po sortu u nepune
+				next = kes->nepun;
+				prev = NULL;
+				while (next) {
+					if (ret->header.broj_slobodnih_slotova > next->header.broj_slobodnih_slotova)
+						break;
+					prev = next;
+					next = next->header.broj_slobodnih_slotova;
 				}
+				if (!next)
+				{ // ne postji nepun sa vise slobodnih slotova
+					ret->header.sledeci = kes->nepun->header.sledeci;
+					kes->nepun->header.sledeci = ret;
+				}
+				else {
+					ret->header.sledeci = next;
+					prev->header.sledeci = ret;
+				}
+				return ret;
 			}
-			preuredi_nepune_slabove(kes);
-			return ret;
 		}
 		prev = next;
 		next = next->header.sledeci;
 	}
+
+
 	next = kes->nepun;
 	prev = NULL;
 	while (next)
-	{
+	{ // pretrazuje nepune
 		if (ret = obrisi_objekt_u_slabu(next, obj))
-		{
-			preuredi_nepune_slabove(kes);
-			return ret;
-		}
+			// nasao slab objekta kojeg izbacuje
+			if (ret->header.broj_slobodnih_slotova == ret->header.broj_slotova)
+			{ // prazan je, treba ga staviti u prazne slabove
+				if (!prev)
+				{ // nema prethondika u nepunim
+					kes->nepun = kes->nepun->header.sledeci;
+
+					if (!kes->prazan) // nema ni jedan prazan slab
+						kes->prazan = ret;
+					else
+					{ // ima makar jedan prazan slab
+						ret = kes->prazan->header.sledeci;
+						kes->prazan->header.sledeci = ret;
+					}
+				}
+				return ret;
+			}
+			else
+			{ // nije prazan, treba proveriti da li nepuni ostaju sortirani
+				if (prev) {
+					if (prev->header.broj_slobodnih_slotova < ret->header.broj_slobodnih_slotova)
+					{ // mora da se sortira, prethodni ima vise zauzetih
+						next = kes->nepun;
+						Slab_block* t = ret->header.sledeci;
+						if (prev = next)
+						{ // prev nema prethodnika
+							ret->header.sledeci = prev;
+							prev->header.sledeci = t;
+							kes->nepun = ret;
+						}
+						else
+						{ // prev ima prethodnike
+							while (next->header.sledeci != prev)
+								next = next->header.sledeci;
+							prev->header.sledeci = t;
+							ret->header.sledeci = prev;
+							next->header.sledeci = ret;
+						}
+					}
+				}
+				return ret;
+			}
+		prev = next;
 		next = next->header.sledeci;
 	}
 	return NULL;
@@ -267,8 +288,7 @@ void obj_free(Kes* kes, void* obj)
 {
 	int index = index_tipskog_kesa(kes);
 	if (index == -1)
-		return; // ne postoji kes
-	//unsigned char iz_punog_slaba = 0;
+		return;
 	Slab_block* za_brisanje = pronadji_slab_objekta_kog_brises(kes, obj);
 }
 
@@ -285,17 +305,46 @@ void buff_free(const void* buff)
 {
 	unsigned char iz_punog_slaba = 0;
 	Kes* kes;
-	for (size_t i = 0; i < BROJ_KESEVA_ZA_BAFERE; i++)
+	for (size_t i = 0; i < BROJ_KESEVA_ZA_BAFERE; i++) {
 		if (kes = pronadji_slab_objekta_kog_brises(&slab->baferisani_kesevi[i], buff))
 			return;
+	}
 }
 
-Kes* skupi_kes(Kes* kes) // vraca broj oslobodjenih blokova
+int skupi_kes(Kes* kes) // vraca broj oslobodjenih blokova
 {
+	int osobodjeni_kesevi = 0;
 	int index = index_tipskog_kesa(kes);
 	if (index == -1)
 		return NULL;
-	return kes;
+
+	int pola = kes->velicina;
+
+	Slab_block* next = kes->nepun;
+	Slab_block* prev = NULL;
+	while (next) {
+		//if ()
+
+	}
+
+	next = kes->prazan;
+	prev = NULL;
+	while (next) {
+		prev = next;
+		next = next->header.sledeci;
+	}
+	if (!next)
+		return osobodjeni_kesevi;
+	else {
+		if (!prev) {
+			return osobodjeni_kesevi + bajtove_u_min_blokova(kes->velicina);
+		}
+		else {
+
+		}
+
+	}
+	return osobodjeni_kesevi;
 }
 
 void kes_info(Kes* kes)

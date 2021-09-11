@@ -31,9 +31,8 @@ unsigned bajtove_u_min_blokova(unsigned broj_bajtova);
 unsigned min_stepen_za_broj_blokova(unsigned broj_blokova);
 unsigned podeli_blok(unsigned index);
 Buddy_block *spoji_ako_je_brat_slobodan(Buddy_block *buddy_brat, size_t *stepen_dvojke); // vrati adresu spojenog ili NULL ako nije nasao nista
-void premesti_slab(Slab_block *slab_block, unsigned char *iz_praznog_slaba, Kes *kes);
+void premesti_slab(Slab_block *slab_block, unsigned char iz_praznog_slaba, Kes *kes);
 void *slot_alloc(Slab_block *slab_block, unsigned char *iz_praznog_slaba);
-void slot_free(Kes *kes);
 void slab_info(Slab_block* slab_block);
 Slab_block*slab_alloc_typed(Kes *moj_kes); 
 Slab_block* slab_alloc_buffered(Kes *moj_kes);
@@ -101,7 +100,7 @@ void *obj_buffer_alloc(Kes *kes); // vraca obj buffer-a koji kes cuva
 void obj_free(Kes *kes, void *obj);
 void *buff_alloc(size_t size);
 void buff_free(const void *buff); // nemam kontrolu pogresnog unosa
-Kes *skupi_kes(Kes *kes);
+int skupi_kes(Kes *kes);
 void kes_info(Kes *kes);
 int kes_error(Kes *kes);
 

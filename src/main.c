@@ -11,7 +11,7 @@
 
 #define shared_size (7)
 
-void construct(void *data)
+void construct(void* data)
 {
 	static int i = 1;
 	printf_s("%d Shared object constructed.\n", i++);
@@ -20,29 +20,29 @@ void construct(void *data)
 	proba[0];
 }
 
-int check(void *data, size_t size)
+int check(void* data, size_t size)
 {
 	for (int i = 0; i < size; i++)
-		if (((unsigned char *)data)[i] != MASK)
+		if (((unsigned char*)data)[i] != MASK)
 			return 0;
 	return 1;
 }
 
 struct objects_s
 {
-	kmem_cache_t *cache;
-	void *data;
+	kmem_cache_t* cache;
+	void* data;
 };
 
-void work(void *pdata)
+void work(void* pdata)
 {
-	struct data_s data = *(struct data_s *)pdata;
+	struct data_s data = *(struct data_s*)pdata;
 	char buffer[1024];
 	int size = 0;
 	sprintf_s(buffer, 1024, "thread cache %d", data.id);
-	kmem_cache_t *cache = kmem_cache_create(buffer, data.id, 0, 0);
+	kmem_cache_t* cache = kmem_cache_create(buffer, data.id, 0, 0);
 
-	struct objects_s *objs = (struct objects_s *)(kmalloc(sizeof(struct objects_s) * data.iterations));
+	struct objects_s* objs = (struct objects_s*)(kmalloc(sizeof(struct objects_s) * data.iterations));
 
 	for (int i = 0; i < data.iterations; i++)
 	{
@@ -50,7 +50,7 @@ void work(void *pdata)
 		{
 			objs[size].data = kmem_cache_alloc(data.shared);
 			objs[size].cache = data.shared;
- 			assert(check(objs[size].data, shared_size));
+			assert(check(objs[size].data, shared_size));
 		}
 		else
 		{
@@ -68,6 +68,7 @@ void work(void *pdata)
 	{
 		assert(check(objs[i].data, (cache == objs[i].cache) ? data.id : shared_size));
 		kmem_cache_free(objs[i].cache, objs[i].data);
+
 	}
 
 	kfree(objs); // ne radi ova f-ja
@@ -76,15 +77,15 @@ void work(void *pdata)
 
 int main()
 {
-	void *space = malloc(BLOCK_SIZE * BLOCK_NUMBER);
+	void* space = malloc(BLOCK_SIZE * BLOCK_NUMBER);
 	int* pok = (int*)space;
 	kmem_init(space, BLOCK_NUMBER);
-	kmem_cache_t *shared = kmem_cache_create("shared object", shared_size, construct, NULL);
+	kmem_cache_t* shared = kmem_cache_create("shared object", shared_size, construct, NULL);
 
 	struct data_s data;
 	data.shared = shared;
 	data.iterations = ITERATIONS;
- 	run_threads(work, &data, THREAD_NUM);
+	run_threads(work, &data, THREAD_NUM);
 
 	kmem_cache_destroy(shared);
 

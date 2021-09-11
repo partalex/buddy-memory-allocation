@@ -5,11 +5,11 @@
 
 
 void run_threads(void(*work)(void*), struct data_s* data, int num) {
-	num = 2;
-	HANDLE* threads = (HANDLE *)malloc(sizeof(HANDLE) * num);
+	num = 1;
+	HANDLE* threads = (HANDLE*)malloc(sizeof(HANDLE) * num);
 	struct data_s* private_data = (struct data_s*)malloc(sizeof(struct data_s) * num);
 	for (int i = 0; i < num; i++) {
-		private_data[i] = *(struct data_s*) data;
+		private_data[i] = *(struct data_s*)data;
 		private_data[i].id = i + 1;
 		threads[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)work, &private_data[i], 0, NULL);
 	}

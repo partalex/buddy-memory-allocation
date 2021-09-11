@@ -59,47 +59,73 @@ unsigned podeli_blok(unsigned index)
 	return index - 1;
 }
 
-void premesti_slab(Slab_block* slab_block, unsigned char* iz_praznog_slaba, Kes* kes)
+void premesti_slab(Slab_block* slab_block, unsigned char iz_praznog_slaba, Kes* kes)
 {
+	if (iz_praznog_slaba)
+	{ // potice iz praznog
+		Slab_block* prazan = kes->prazan;
+		Slab_block* prev_prazan = NULL;
+		while (prazan) {
+			if (prazan == slab_block)
+				break;
+			prev_prazan = prazan;
+			prazan = prazan->header.sledeci;
+		}
+		if (!prev_prazan)
+			kes->prazan = kes->prazan->header.sledeci;
+		else
+			prev_prazan->header.sledeci = prazan->header.sledeci;
+	}
+	else
+	{ // potice iz nepunog
+		if (slab_block->header.broj_slobodnih_slotova)
+			return;
+		Slab_block* nepun = kes->nepun;
+		Slab_block* prev_nepun = NULL;
+		while (nepun) {
+			if (nepun == slab_block)
+				break;
+			prev_nepun = nepun;
+			nepun = nepun->header.sledeci;
+		}
+		if (!prev_nepun)
+			kes->nepun = kes->prazan->header.sledeci;
+		else
+			prev_nepun->header.sledeci = nepun->header.sledeci;
+
+	}
 	if (slab_block->header.broj_slobodnih_slotova)
-	{
-		if (*iz_praznog_slaba)
-		{
-			kes->nepun = kes->prazan;
-			kes->prazan = NULL;
+	{ // staviti ga u nepune
+		Slab_block* nepun = kes->nepun;
+		Slab_block* prev_nepun = NULL;
+
+		while (nepun) {
+			if (slab_block->header.broj_slobodnih_slotova > nepun->header.broj_slobodnih_slotova)
+				break;
+			prev_nepun = nepun;
+			nepun = nepun->header.sledeci;
+		}
+		if (!nepun)
+			kes->nepun = slab_block;
+		else if (!prev_nepun)
+		{ //slab_block->header.sledeci = 
+			kes->nepun->header.sledeci = slab_block;
+			return;
+		}
+		else {
+			slab_block->header.sledeci = prev_nepun->header.sledeci;
+			prev_nepun->header.sledeci = slab_block;
+			return;
 		}
 	}
 	else
-	{
-		Slab_block* next = kes->pun;
-		if (!next)
-		{
-			if (*iz_praznog_slaba)
-			{
-				kes->pun = kes->prazan;
-				kes->prazan = NULL;
-			}
-			else
-			{
-				kes->pun = kes->nepun;
-				kes->nepun = NULL;
-			}
-		}
-		else
-		{
-			while (next->header.sledeci)
-				next = next->header.sledeci;
-			if (*iz_praznog_slaba)
-			{
-				next->header.sledeci = kes->prazan;
-				kes->prazan = NULL;
-			}
-			else
-			{
-				next->header.sledeci = kes->nepun;
-				kes->nepun = NULL;
-			}
-		}
+	{ // staviti ga u pune
+		Slab_block* pun = kes->pun;
+		Slab_block* prev_pun = NULL;
+
+		if (kes->pun)
+			slab_block->header.sledeci = kes->pun;
+		kes->pun = slab_block;
 	}
 }
 
@@ -112,16 +138,13 @@ void* slot_alloc(Slab_block* slab_block, unsigned char* iz_praznog_slaba)
 		if (*(char*)prazan_slot == 0)
 		{
 			slab_block->header.broj_slobodnih_slotova--;
-			if (*iz_praznog_slaba) // kad je poziva f-ja preuredi
-				premesti_slab(slab_block, iz_praznog_slaba, slab_block->header.moj_kes);
+			premesti_slab(slab_block, *iz_praznog_slaba, slab_block->header.moj_kes);
 			return prazan_slot;
 		}
 		prazan_slot += slab_block->header.velicina_slota;
 	}
 	return NULL;
 }
-
-void slot_free() {}
 
 void slab_info(Slab_block* slab_block) {
 	if (!slab_block)
