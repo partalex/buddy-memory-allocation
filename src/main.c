@@ -6,7 +6,8 @@
 #include "../test/test.h"
 
 #define BLOCK_NUMBER (1000)
-#define THREAD_NUM (5)
+//#define THREAD_NUM (1)
+#define THREAD_NUM (10)
 #define ITERATIONS (1000)
 
 #define shared_size (7)
@@ -46,7 +47,7 @@ void work(void* pdata)
 
 	for (int i = 0; i < data.iterations; i++)
 	{
-		if (i % 100 == 0)
+		if (i % 100 == 0)	
 		{
 			objs[size].data = kmem_cache_alloc(data.shared);
 			objs[size].cache = data.shared;

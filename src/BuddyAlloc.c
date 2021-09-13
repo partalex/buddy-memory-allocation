@@ -91,7 +91,7 @@ void premesti_slab(Slab_block* slab_block, unsigned char iz_praznog_slaba, Kes* 
 			nepun = nepun->header.sledeci;
 		}
 		if (!prev_nepun)
-			kes->nepun = kes->prazan->header.sledeci;
+			kes->nepun = kes->nepun->header.sledeci;
 		else
 			prev_nepun->header.sledeci = nepun->header.sledeci;
 
@@ -137,7 +137,7 @@ void* slot_alloc(Slab_block* slab_block, unsigned char* iz_praznog_slaba)
 
 	for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
 	{
-		if (*(char*)prazan_slot == 0)
+		if (*(char*)prazan_slot == 0) 
 		{
 			slab_block->header.broj_slobodnih_slotova--;
 			premesti_slab(slab_block, *iz_praznog_slaba, slab_block->header.moj_kes);
@@ -172,13 +172,15 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 	unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
 
 	unsigned sledeci_stepen = min_stepen;
+	lock(buddy->mutex);
 	while (sledeci_stepen < VELICINA_PAMTLJIVOG) {
 		if (buddy->niz_slobodnih_blokova[sledeci_stepen])
 			break;
 		sledeci_stepen++;
 	}
 	if (sledeci_stepen == VELICINA_PAMTLJIVOG)
-		return NULL; // nema slobodnih
+		return return_and_unlock(buddy->mutex, NULL);
+		//return NULL; // nema slobodnih
 	while (sledeci_stepen < VELICINA_PAMTLJIVOG) // radi deobu
 	{
 		if (sledeci_stepen == min_stepen)
@@ -196,11 +198,15 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova;
 			memset(ret->header.prvi_slot, 0, ret->header.broj_slobodnih_slotova * ret->header.velicina_slota);
 			ret->header.moj_kes = moj_kes;
-			return ret;
+			//unlock(buddy->mutex);
+//;			return ret;
+			return return_and_unlock(buddy->mutex, ret);
 		}
 		sledeci_stepen = podeli_blok(sledeci_stepen);
 	}
-	return NULL;
+	//unlock(buddy->mutex);
+	//return NULL;
+	return return_and_unlock(buddy->mutex, NULL);
 }
 
 Slab_block* slab_alloc_buffered(Kes* moj_kes)

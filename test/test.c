@@ -5,7 +5,6 @@
 
 
 void run_threads(void(*work)(void*), struct data_s* data, int num) {
-	num = 2;	
 	HANDLE* threads = (HANDLE*)malloc(sizeof(HANDLE) * num);
 	struct data_s* private_data = (struct data_s*)malloc(sizeof(struct data_s) * num);
 	for (int i = 0; i < num; i++) {
@@ -18,6 +17,7 @@ void run_threads(void(*work)(void*), struct data_s* data, int num) {
 		WaitForSingleObject(threads[i], INFINITE);
 		CloseHandle(threads[i]);
 	}
+
 	free(threads);
 	free(private_data);
 }
