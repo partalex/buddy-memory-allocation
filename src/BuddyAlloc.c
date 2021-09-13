@@ -10,32 +10,32 @@ void buddy_inic()
 	unsigned nedodeljeni_blokovi = buddy->broj_blokova;
 	while (nedodeljeni_blokovi)
 	{
-		unsigned index = floor(log2((double)nedodeljeni_blokovi));
+		unsigned index = (unsigned)floor(log2((double)nedodeljeni_blokovi));
 		Buddy_block* next = buddy->niz_slobodnih_blokova[index];
 		if (!next) {
-			buddy->niz_slobodnih_blokova[index] = adress;
+			buddy->niz_slobodnih_blokova[index] = (Buddy_block *)adress;
 			buddy->niz_slobodnih_blokova[index]->sledeci = NULL;
 		}
 		else {
 			while (next->sledeci)
 				next = next->sledeci;
-			next->sledeci = adress;
+			next->sledeci = (Buddy_block*)adress;
 			next->sledeci->sledeci = NULL;
 
 		}
 		adress += (uintptr_t)(pow(2, index) * BLOCK_SIZE);
-		nedodeljeni_blokovi -= pow(2, index);
+		nedodeljeni_blokovi -= (unsigned)pow(2, index);
 	}
 }
 
 unsigned bajtove_u_min_blokova(unsigned broj_bajtova)
 {
-	return ceil(1. * broj_bajtova / BLOCK_SIZE);
+	return (unsigned)ceil(1. * broj_bajtova / BLOCK_SIZE);
 }
 
 unsigned min_stepen_za_broj_blokova(unsigned broj_blokova)
 {
-	return ceil(log2((double)broj_blokova));
+	return (unsigned)ceil(log2((double)broj_blokova));
 }
 
 unsigned podeli_blok(unsigned index)
@@ -61,8 +61,12 @@ unsigned podeli_blok(unsigned index)
 	return index - 1;
 }
 
-void premesti_slab(Slab_block* slab_block, unsigned char iz_praznog_slaba, Kes* kes)
+void premesti_slab(Slab_block* slab_block, unsigned iz_praznog_slaba)
 {
+	Kes* kes = slab_block->header.moj_kes;
+	if (!kes->prazan && iz_praznog_slaba)
+		iz_praznog_slaba = 0;
+
 	if (iz_praznog_slaba)
 	{ // potice iz praznog
 		Slab_block* prazan = kes->prazan;
@@ -73,8 +77,12 @@ void premesti_slab(Slab_block* slab_block, unsigned char iz_praznog_slaba, Kes* 
 			prev_prazan = prazan;
 			prazan = prazan->header.sledeci;
 		}
-		if (!prev_prazan)
+		if (!prev_prazan) {
+			if (!kes->prazan)
+				printf("nasao sam te");
+
 			kes->prazan = kes->prazan->header.sledeci;
+		}
 		else
 			prev_prazan->header.sledeci = prazan->header.sledeci;
 	}
@@ -131,16 +139,16 @@ void premesti_slab(Slab_block* slab_block, unsigned char iz_praznog_slaba, Kes* 
 	}
 }
 
-void* slot_alloc(Slab_block* slab_block, unsigned char* iz_praznog_slaba)
+void* slot_alloc(Slab_block* slab_block, unsigned * iz_praznog_slaba)
 {
 	uintptr_t prazan_slot = slab_block->header.prvi_slot;
 
 	for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
 	{
-		if (*(char*)prazan_slot == 0) 
+		if (*(char*)prazan_slot == 0)
 		{
 			slab_block->header.broj_slobodnih_slotova--;
-			premesti_slab(slab_block, *iz_praznog_slaba, slab_block->header.moj_kes);
+			premesti_slab(slab_block, *iz_praznog_slaba);
 			return prazan_slot;
 		}
 		prazan_slot += slab_block->header.velicina_slota;
@@ -172,15 +180,13 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 	unsigned min_stepen = min_stepen_za_broj_blokova(potrebno_blokova);
 
 	unsigned sledeci_stepen = min_stepen;
-	lock(buddy->mutex);
 	while (sledeci_stepen < VELICINA_PAMTLJIVOG) {
 		if (buddy->niz_slobodnih_blokova[sledeci_stepen])
 			break;
 		sledeci_stepen++;
 	}
 	if (sledeci_stepen == VELICINA_PAMTLJIVOG)
-		return return_and_unlock(buddy->mutex, NULL);
-		//return NULL; // nema slobodnih
+		return NULL; // nema slobodnih
 	while (sledeci_stepen < VELICINA_PAMTLJIVOG) // radi deobu
 	{
 		if (sledeci_stepen == min_stepen)
@@ -198,15 +204,11 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova;
 			memset(ret->header.prvi_slot, 0, ret->header.broj_slobodnih_slotova * ret->header.velicina_slota);
 			ret->header.moj_kes = moj_kes;
-			//unlock(buddy->mutex);
-//;			return ret;
-			return return_and_unlock(buddy->mutex, ret);
+			return ret;
 		}
 		sledeci_stepen = podeli_blok(sledeci_stepen);
 	}
-	//unlock(buddy->mutex);
-	//return NULL;
-	return return_and_unlock(buddy->mutex, NULL);
+	return NULL;
 }
 
 Slab_block* slab_alloc_buffered(Kes* moj_kes)
@@ -252,7 +254,7 @@ Buddy_block* spoji_ako_je_brat_slobodan(Buddy_block* buddy_brat, size_t* stepen_
 	Buddy_block* next = buddy->niz_slobodnih_blokova[*stepen_dvojke];
 	Buddy_block* prethodni = NULL;
 	Buddy_block* brat = NULL;
-	unsigned stepen = pow(2, *stepen_dvojke);
+	unsigned stepen = (unsigned)pow(2, *stepen_dvojke);
 	uintptr_t moguci_nizi_brat = (uintptr_t)buddy_brat - stepen * BLOCK_SIZE;
 	uintptr_t moguci_visi_brat = (uintptr_t)buddy_brat + stepen * BLOCK_SIZE;
 	short visi = 0; // visi = 1, nizi = 0
@@ -330,5 +332,5 @@ unsigned oslobodi(Buddy_block* buddy_block, size_t stepen_dvojke)
 	{
 		next = spoji_ako_je_brat_slobodan(next, &stepen_dvojke);
 	}
-	return stepen_dvojke;
+	return (unsigned)stepen_dvojke;
 }

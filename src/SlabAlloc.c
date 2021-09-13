@@ -7,16 +7,13 @@
 
 int index_tipskog_kesa(Kes* kes)
 {
-	lock(slab->mutex);
 	for (size_t i = 0; i < BROJ_TIPSKIH_KESEVA; i++)
 		if (kes == slab->ulancani_kesevi + i) {
-			if(slab->niz_napravljenih_keseva[i])
-				return return_and_unlock(slab->mutex, i);
-			return return_and_unlock(slab->mutex, -1);
+			if (slab->niz_napravljenih_keseva[i])
+				return i;
+			return -1;
 		}
-	//return i;
-//return -1;
-	return return_and_unlock(slab->mutex, -1);
+	return -1;
 }
 
 void inic_baferske_keseve()
@@ -58,14 +55,13 @@ void slab_inic(uintptr_t pocetna_adresa, unsigned ukupan_broj_blokova)
 
 Kes* daj_prazno_mesto_za_kes()
 {
-	lock(slab->mutex);
 	for (size_t i = 0; i < BROJ_TIPSKIH_KESEVA; i++)
 		if (!slab->niz_napravljenih_keseva[i])
 		{
 			slab->niz_napravljenih_keseva[i] = 1;
-			return return_and_unlock(slab->mutex, slab->ulancani_kesevi + i);
+			return slab->ulancani_kesevi + i;
 		}
-	return return_and_unlock(slab->mutex, NULL);
+	return NULL;
 }
 
 Kes* kes_alloc(const char* naziv, size_t velicina, // size je broj blokova ili velcina objekta tog tog tipa
@@ -81,19 +77,15 @@ Kes* kes_alloc(const char* naziv, size_t velicina, // size je broj blokova ili v
 	kes->dtor = dtor;
 	kes->mutex = create_mutex();
 
-	lock(kes->mutex);
 	kes->prazan = slab_alloc_typed(kes);
 	if (!kes->prazan)
-		return return_and_unlock(kes->mutex, NULL);
-	//return NULL;
+		return NULL;
 
-//return kes;
-	return return_and_unlock(kes->mutex, kes);
+	return kes;
 }
 
 void oslobodi_slabove_kesa(Kes* kes)
 {
-	lock(buddy->mutex);
 	Slab_block* next = kes->nepun;
 	Slab_block* za_oslobadjanje = NULL;
 	while (next)
@@ -120,7 +112,6 @@ void oslobodi_slabove_kesa(Kes* kes)
 	kes->prazan = NULL;
 	kes->nepun = NULL;
 	kes->pun = NULL;
-	unlock(buddy->mutex);
 }
 
 void kes_free(Kes* kes)
@@ -129,24 +120,20 @@ void kes_free(Kes* kes)
 	if (index == -1)
 		return NULL;
 	oslobodi_slabove_kesa(kes);
-	lock(slab->mutex);
 	slab->niz_napravljenih_keseva[index] = 0;
 	memset(slab->ulancani_kesevi + index, 0, sizeof(Kes));
-	unlock(slab->mutex);
 }
 
-Slab_block* obezbedi_slab_za_typed_obj(Kes* kes, unsigned char* iz_praznog_slaba)
+Slab_block* obezbedi_slab_za_typed_obj(Kes* kes, unsigned* iz_praznog_slaba)
 {
-	if (!kes->nepun) {
+	*iz_praznog_slaba = 0;
+	if (kes->nepun == NULL) {
+		*iz_praznog_slaba = 1;
 		if (kes->prazan)
-		{
-			*iz_praznog_slaba = 1;
 			return kes->prazan;
-		}
 		else
 			return kes->prazan = slab_alloc_typed(kes);
 	}
-	*iz_praznog_slaba = 0;
 	return kes->nepun;
 }
 
@@ -160,36 +147,29 @@ void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
 	if (index_tipskog_kesa(kes) == -1)
 		return NULL; // greska 
-	unsigned char iz_praznog_slaba = 1;
-	lock(kes->mutex);
+	int* iz_praznog_slaba = malloc(sizeof(int));
+	*iz_praznog_slaba = 1;
 	Slab_block* slab_block = obezbedi_slab_za_typed_obj(kes, &iz_praznog_slaba);
 	if (!slab_block)
-		//return NULL;
-		return return_and_unlock(kes->mutex, NULL);
+		return NULL;
 	void* slot = slot_alloc(slab_block, &iz_praznog_slaba);
 	if (!slot)
-		//return NULL;
-		return return_and_unlock(kes->mutex, NULL);
+		return NULL;
 	if (kes->ctor)
 		kes->ctor(slot);
-	//return slot;
-	return return_and_unlock(kes->mutex, slot);
+	return slot;
 }
 
 void* obj_buffer_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
-	lock(kes->mutex);
 	Slab_block* slab_block = obezbedi_slab_za_buff_obj(kes);
 	if (!slab_block)
-		//return NULL;
-		return return_and_unlock(kes->mutex, NULL);
+		return NULL;
 	short iz_praznog_slaba = 1;
 	void* slot = slot_alloc(slab_block, &iz_praznog_slaba);
 	if (!slot)
-		//return NULL;
-		return return_and_unlock(kes->mutex, NULL);
-	//return slot;
-	return return_and_unlock(kes->mutex, slot);
+		return NULL;
+	return slot;
 }
 
 Slab_block* obrisi_objekt_u_slabu(Slab_block* slab_block, void* obj)
@@ -245,7 +225,7 @@ Slab_block* pronadji_slab_objekta_kog_brises(Kes* kes, void* obj)
 					}
 					ret->header.sledeci = next;
 					prev->header.sledeci = ret;
-				
+
 				}
 				return ret;
 			}
@@ -313,9 +293,7 @@ void obj_free(Kes* kes, void* obj)
 	int index = index_tipskog_kesa(kes);
 	if (index == -1)
 		return;
-	lock(kes->mutex);
 	Slab_block* za_brisanje = pronadji_slab_objekta_kog_brises(kes, obj);
-	unlock(kes->mutex);
 }
 
 void* buff_alloc(size_t size)
@@ -331,10 +309,8 @@ void buff_free(const void* buff)
 {
 	unsigned char iz_punog_slaba = 0;
 	Kes* kes;
-	lock(slab->mutex);
 	for (size_t i = 0; i < BROJ_KESEVA_ZA_BAFERE; i++) {
 		if (kes = pronadji_slab_objekta_kog_brises(&slab->baferisani_kesevi[i], buff)) {
-			unlock(slab->mutex);
 			return;
 		}
 	}
@@ -346,8 +322,6 @@ int skupi_kes(Kes* kes) // vraca broj oslobodjenih blokova
 	int index = index_tipskog_kesa(kes);
 	if (index == -1)
 		return NULL;
-
-	lock(kes->mutex);
 
 	int pola = kes->velicina;
 	Slab_block* next = kes->nepun;
@@ -372,10 +346,8 @@ int skupi_kes(Kes* kes) // vraca broj oslobodjenih blokova
 		else {
 
 		}
-
 	}
-	//return osobodjeni_kesevi;
-	return return_and_unlock(kes->mutex, osobodjeni_kesevi);
+	return osobodjeni_kesevi;
 }
 
 void kes_info(Kes* kes)
