@@ -13,7 +13,7 @@ void buddy_inic()
 		unsigned index = (unsigned)floor(log2((double)nedodeljeni_blokovi));
 		Buddy_block* next = buddy->niz_slobodnih_blokova[index];
 		if (!next) {
-			buddy->niz_slobodnih_blokova[index] = (Buddy_block *)adress;
+			buddy->niz_slobodnih_blokova[index] = adress;
 			buddy->niz_slobodnih_blokova[index]->sledeci = NULL;
 		}
 		else {
@@ -23,7 +23,7 @@ void buddy_inic()
 			next->sledeci->sledeci = NULL;
 
 		}
-		adress += (uintptr_t)(pow(2, index) * BLOCK_SIZE);
+		adress += (pow(2, index) * BLOCK_SIZE);
 		nedodeljeni_blokovi -= (unsigned)pow(2, index);
 	}
 }
@@ -44,19 +44,11 @@ unsigned podeli_blok(unsigned index)
 	buddy->niz_slobodnih_blokova[index] = prvi_buddy->sledeci;     // izbaci onog kog delim
 
 	Buddy_block* next = buddy->niz_slobodnih_blokova[index - 1];
-	if (!next)
-		buddy->niz_slobodnih_blokova[index - 1] = prvi_buddy;
-	else {
-		while (next->sledeci)
-			next = next->sledeci;
-		next->sledeci = prvi_buddy;
-	}
+	buddy->niz_slobodnih_blokova[index - 1] = prvi_buddy;
 
 	Buddy_block* drugi_buddy = (Buddy_block*)((uintptr_t)prvi_buddy + (unsigned)(pow(2, index - 1) * BLOCK_SIZE));
 	drugi_buddy->sledeci = NULL;
-
 	prvi_buddy->sledeci = drugi_buddy;
-
 
 	return index - 1;
 }
@@ -64,8 +56,8 @@ unsigned podeli_blok(unsigned index)
 void premesti_slab(Slab_block* slab_block, unsigned iz_praznog_slaba)
 {
 	Kes* kes = slab_block->header.moj_kes;
-	if (!kes->prazan && iz_praznog_slaba)
-		iz_praznog_slaba = 0;
+	/*if (!kes->prazan && iz_praznog_slaba)
+		iz_praznog_slaba = 0;*/
 
 	if (iz_praznog_slaba)
 	{ // potice iz praznog
@@ -79,7 +71,7 @@ void premesti_slab(Slab_block* slab_block, unsigned iz_praznog_slaba)
 		}
 		if (!prev_prazan) {
 			if (!kes->prazan)
-				printf("nasao sam te");
+					printf("nasao sam te");
 
 			kes->prazan = kes->prazan->header.sledeci;
 		}
@@ -139,7 +131,7 @@ void premesti_slab(Slab_block* slab_block, unsigned iz_praznog_slaba)
 	}
 }
 
-void* slot_alloc(Slab_block* slab_block, unsigned * iz_praznog_slaba)
+void* slot_alloc(Slab_block* slab_block, unsigned* iz_praznog_slaba)
 {
 	uintptr_t prazan_slot = slab_block->header.prvi_slot;
 
@@ -195,8 +187,8 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 			buddy->niz_slobodnih_blokova[min_stepen] = slobodan->sledeci;
 			slobodan->sledeci = NULL;
 			Slab_block* ret = (Slab_block*)slobodan;
-			memset(ret, 0, sizeof(Slab_block));
 			ret->header.stepen_dvojke = min_stepen;
+			ret->header.sledeci = NULL;
 			ret->header.velicina_slota = moj_kes->velicina;
 			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header);
 			ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
@@ -251,6 +243,7 @@ Slab_block* slab_alloc_buffered(Kes* moj_kes)
 
 Buddy_block* spoji_ako_je_brat_slobodan(Buddy_block* buddy_brat, size_t* stepen_dvojke)
 {
+	memset(buddy_brat, 0, pow(2, *stepen_dvojke));
 	Buddy_block* next = buddy->niz_slobodnih_blokova[*stepen_dvojke];
 	Buddy_block* prethodni = NULL;
 	Buddy_block* brat = NULL;

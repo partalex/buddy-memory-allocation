@@ -1,19 +1,2 @@
-﻿  SlabAlloc.c
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(13,13): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(25,25): warning C4477: 'sprintf_s' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'size_t'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(25,25): message : consider using '%zd' in the format string
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(27,53): warning C4244: 'function': conversion from 'size_t' to 'double', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(27,54): warning C4244: '=': conversion from 'double' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(49,131): warning C4047: '=': 'uintptr_t' differs in levels of indirection from 'Buddy *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(75,26): warning C4267: '=': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(121,14): warning C4098: 'kes_free': 'void' function returning a value
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(152,76): warning C4047: 'function': 'unsigned int *' differs in levels of indirection from 'int **'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(152,59): warning C4024: 'obezbedi_slab_za_typed_obj': different types for formal and actual parameter 2
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(155,55): warning C4047: 'function': 'unsigned int *' differs in levels of indirection from 'int **'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(155,38): warning C4024: 'slot_alloc': different types for formal and actual parameter 2
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(169,55): warning C4133: 'function': incompatible types - from 'short *' to 'unsigned int *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(301,51): warning C4267: 'function': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(313,79): warning C4090: 'function': different 'const' qualifiers
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(313,80): warning C4133: '=': incompatible types - from 'Slab_block *' to 'Kes *'
-C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\src\SlabAlloc.c(324,14): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
-  OS2.vcxproj -> C:\Users\SKT BABA ZOKA\Documents\GitHub\OS2\x64\Debug\OS2.exe
+﻿  main.c
+  OS2.vcxproj -> C:\Users\kaoko\Documents\GitHub\OS2\x64\Debug\OS2.exe

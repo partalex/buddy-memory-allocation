@@ -127,10 +127,13 @@ void kes_free(Kes* kes)
 Slab_block* obezbedi_slab_za_typed_obj(Kes* kes, unsigned* iz_praznog_slaba)
 {
 	*iz_praznog_slaba = 0;
-	if (kes->nepun == NULL) {
+	if (!kes->nepun) {
 		*iz_praznog_slaba = 1;
-		if (kes->prazan)
+		if (kes->prazan) {
+			if (kes != kes->prazan->header.moj_kes)
+				printf("error");
 			return kes->prazan;
+		}
 		else
 			return kes->prazan = slab_alloc_typed(kes);
 	}
@@ -147,8 +150,7 @@ void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
 	if (index_tipskog_kesa(kes) == -1)
 		return NULL; // greska 
-	int* iz_praznog_slaba = malloc(sizeof(int));
-	*iz_praznog_slaba = 1;
+	int iz_praznog_slaba = 1;
 	Slab_block* slab_block = obezbedi_slab_za_typed_obj(kes, &iz_praznog_slaba);
 	if (!slab_block)
 		return NULL;
