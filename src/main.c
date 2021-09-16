@@ -4,9 +4,10 @@
 #include <assert.h>
 #include "../h/slab.h"
 #include "../test/test.h"
+#include "../h/Strukture.h"
 
 #define BLOCK_NUMBER (1000)
-#define THREAD_NUM (5)
+#define THREAD_NUM (20)
 #define ITERATIONS (1000)
 
 #define shared_size (7)

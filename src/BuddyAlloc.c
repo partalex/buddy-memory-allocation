@@ -126,7 +126,14 @@ void premesti_slab(Slab_block* slab_block, unsigned iz_praznog_slaba)
 
 void* slot_alloc(Slab_block* slab_block, unsigned* iz_praznog_slaba)
 {
-	uintptr_t prazan_slot = slab_block->header.prvi_slot;
+	unsigned index = index_slobodnog_slota(slab_block->header.niz_slobodnih_slotova, slab_block->header.broj_slotova);
+	if (index == -1)
+		return NULL;
+	slab_block->header.broj_slobodnih_slotova--;
+	premesti_slab(slab_block, *iz_praznog_slaba);
+	return slab_block->header.prvi_slot + index * slab_block->header.velicina_slota;
+
+	/*uintptr_t prazan_slot = slab_block->header.prvi_slot;
 
 	for (size_t i = 0; i < slab_block->header.broj_slotova; i++)
 	{
@@ -138,7 +145,7 @@ void* slot_alloc(Slab_block* slab_block, unsigned* iz_praznog_slaba)
 		}
 		prazan_slot += slab_block->header.velicina_slota;
 	}
-	return NULL;
+	return NULL;*/
 }
 
 void slab_info(Slab_block* slab_block) {
@@ -180,17 +187,23 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 			unsigned short local = slobodan->local;
 			buddy->niz_slobodnih_blokova[min_stepen] = slobodan->next;
 			slobodan->next = NULL;
+
 			Slab_block* ret = (Slab_block*)slobodan;
 			ret->header.stepen_dvojke = min_stepen;
 			ret->header.sledeci = NULL;
 			ret->header.local = local;
 			ret->header.velicina_slota = moj_kes->velicina;
-			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header);
-			ret->header.broj_slotova = (unsigned)(pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE) - sizeof(Slab_block_header);
-			ret->header.broj_slotova /= moj_kes->velicina;
-			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova;
-			memset(ret->header.prvi_slot, 0, ret->header.broj_slobodnih_slotova * ret->header.velicina_slota);
+			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova = broj_slotova(ret->header.velicina_slota, ret->header.stepen_dvojke);
+			ret->header.niz_slobodnih_slotova = (uintptr_t)ret + sizeof(Slab_block_header);
+			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header) +
+				ceil(ret->header.broj_slotova / 8.);
 			ret->header.moj_kes = moj_kes;
+
+			unsigned velicina_niza = ceil(ret->header.broj_slotova / 8.);
+			memset(ret->header.niz_slobodnih_slotova, 0xFF, ret->header.broj_slotova);
+			unsigned set = pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE - sizeof(Slab_block_header) - velicina_niza;
+			memset((uintptr_t)ret + sizeof(Slab_block_header) + velicina_niza, 0, set);
+
 			return ret;
 		}
 		sledeci_stepen = podeli_blok(sledeci_stepen);
@@ -217,17 +230,26 @@ Slab_block* slab_alloc_buffered(Kes* moj_kes)
 		if (sledeci_stepen == min_stepen)
 		{
 			Buddy_block* slobodan = buddy->niz_slobodnih_blokova[min_stepen];
+			unsigned short local = slobodan->local;
 			buddy->niz_slobodnih_blokova[min_stepen] = slobodan->next;
 			slobodan->next = NULL;
+
 			Slab_block* ret = (Slab_block*)slobodan;
-			memset(ret, 0, sizeof(Slab_block));
 			ret->header.stepen_dvojke = min_stepen;
-			ret->header.velicina_slota = moj_kes->velicina - sizeof(Slab_block_header);
-			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header);;
-			ret->header.broj_slotova = 1;
-			ret->header.broj_slobodnih_slotova = 1;
-			memset(ret->header.prvi_slot, 0, ret->header.broj_slobodnih_slotova * ret->header.velicina_slota);
+			ret->header.sledeci = NULL;
+			ret->header.local = local;
+			ret->header.velicina_slota = moj_kes->velicina;
+			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova = broj_slotova(ret->header.velicina_slota, ret->header.stepen_dvojke);
+			ret->header.niz_slobodnih_slotova = (uintptr_t)ret + sizeof(Slab_block_header);
+			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header) +
+				ceil(ret->header.broj_slotova / 8.);
 			ret->header.moj_kes = moj_kes;
+
+			unsigned velicina_niza = ceil(ret->header.broj_slotova / 8.);
+			memset(ret->header.niz_slobodnih_slotova, 0xFF, ret->header.broj_slotova);
+			unsigned set = pow(2, ret->header.stepen_dvojke) * BLOCK_SIZE - sizeof(Slab_block_header) - velicina_niza;
+			memset((uintptr_t)ret + sizeof(Slab_block_header) + velicina_niza, 0, set);
+
 			return ret;
 		}
 		sledeci_stepen = podeli_blok(sledeci_stepen);
@@ -262,7 +284,7 @@ Buddy_block* spoji_ako_je_brat_slobodan(Buddy_block* buddy_brat, size_t* stepen_
 	if (!next)
 		return NULL;
 	if (prethodni) {
-			prethodni->next = next->next;
+		prethodni->next = next->next;
 	}
 	else
 		buddy->niz_slobodnih_blokova[*stepen_dvojke] = next->next;
@@ -282,4 +304,43 @@ unsigned oslobodi(Buddy_block* buddy_block, size_t stepen_dvojke)
 	}
 	return (unsigned)stepen_dvojke;
 }
-	
+
+int index_slobodnog_slota(char* niz_slobodnih_slotova, unsigned broj_slotova) {
+	int index = 0;
+	char mask = 1;
+	char* start = niz_slobodnih_slotova - 1;
+	while (index < broj_slotova) {
+		if (index % 8 == 0) {
+			mask = 1;
+			start++;
+		}
+		if (*start & mask) {
+			int reset = pow(2, mask - 1);
+			*start -= reset;
+			return index;
+		}
+		index++;
+		mask <<= 1;
+	}
+	return -1;
+}
+
+void oslodi_slot(char* niz_slobodnih_slotova, unsigned index) {
+	char mask = 1;
+	char shift = index % 8;
+	mask <<= shift;
+
+	char* start = niz_slobodnih_slotova + index;
+	*start |= mask;
+}
+
+unsigned broj_slotova(unsigned velicina_slota, unsigned stepen_dvojke) {
+	unsigned preostali_bajtovi = BLOCK_SIZE * pow(2, stepen_dvojke) - sizeof(Slab_block_header);
+	return floor(preostali_bajtovi / (velicina_slota + 1. / 8));
+}
+
+unsigned neiskorisceno_bajtova(Slab_block* slab_block) {
+	return  pow(2, slab_block->header.stepen_dvojke) * BLOCK_SIZE -
+		sizeof(Slab_block_header) -
+		slab_block->header.broj_slotova * (slab_block->header.velicina_slota + 1. / 8);
+}

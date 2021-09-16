@@ -57,6 +57,7 @@ typedef struct s_Slab_block_header
 {
 	struct s_Slab_block* sledeci;
 	uintptr_t prvi_slot;
+	uintptr_t niz_slobodnih_slotova;
 	unsigned broj_slotova;
 	unsigned short local;
 	unsigned velicina_slota;

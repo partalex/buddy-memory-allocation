@@ -24,7 +24,7 @@ void inic_baferske_keseve()
 		memset(slab->baferisani_kesevi + i, 0, sizeof(Kes));
 		sprintf_s(buffer, 15, "Mem Buffer %d", i + 5);
 		slab->baferisani_kesevi[i].naziv = buffer;
-		slab->baferisani_kesevi[i].velicina = pow(2, i + 5);
+		slab->baferisani_kesevi[i].velicina = pow(2, i + 5) - 1 - sizeof(Slab_block_header);
 		slab->baferisani_kesevi[i].mutex = create_mutex();
 	}
 }
@@ -202,7 +202,7 @@ Slab_block* obrisi_objekt_u_slabu(Slab_block* slab_block, void* obj)
 		{
 			if (slab_block->header.moj_kes->dtor)
 				slab_block->header.moj_kes->dtor(obj);
-			memset(obj, 0, slab_block->header.velicina_slota);
+			oslodi_slot(slab_block->header.niz_slobodnih_slotova, i);
 			slab_block->header.broj_slobodnih_slotova++;
 			return slab_block;
 		}
