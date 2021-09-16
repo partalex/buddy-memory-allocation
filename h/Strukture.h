@@ -13,7 +13,6 @@ typedef enum {
 	NE_MOZE_DA_SE_SRINKUJE
 } Error;
 
-// typedef struct kmem_cache_s kmem_cache_t;
 typedef struct kmem_cache_s kmem_cache_t;
 typedef struct kmem_cache_s Kes;
 typedef struct s_Slab_block Slab_block;
@@ -26,7 +25,7 @@ typedef struct s_Slab_block Slab_block;
 
 typedef struct s_Buddy_block
 {
-	struct s_Buddy_block* sledeci;
+	struct s_Buddy_block* next;
 	unsigned short local;
 } Buddy_block;
 
@@ -83,7 +82,6 @@ struct kmem_cache_s
 	Slab_block* nepun;
 	Slab_block* pun;
 
-	//Kes* sledeci; // pokazivac
 	Error error;
 	HANDLE mutex;
 };
@@ -127,6 +125,5 @@ void inic_tipske_keseve();
 Kes* daj_prazno_mesto_za_kes();
 void oslobodi_slabove_kesa(Kes* kes);
 Slab_block* obezbedi_slab_za_typed_obj(Kes* kes, unsigned* iz_praznog_slaba);
-void preuredi_nepune_slabove(Kes* kes);
 Slab_block* pronadji_slab_objekta_kog_brises(Kes* kes, void* obj);
 Slab_block* obrisi_objekt_u_slabu(Slab_block* slab_block, void* obj);

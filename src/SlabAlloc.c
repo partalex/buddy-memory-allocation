@@ -350,13 +350,14 @@ int skupi_kes(Kes* kes) // vraca broj oslobodjenih blokova
 	unsigned stepen;
 	unsigned short local;
 	while (next) {
-		kes->prazan = next;
+		kes->prazan = next->header.sledeci;
 		stepen = next->header.stepen_dvojke;
 		local = next->header.local;
 		buddy = next;
 		buddy->local = local;
-		osobodjeni_blokovi += pow(2, stepen);
 		oslobodi(buddy, stepen);
+		osobodjeni_blokovi += pow(2, stepen);
+		next = kes->prazan;
 	}
 	if (!osobodjeni_blokovi)
 		kes->error = NE_MOZE_DA_SE_SRINKUJE;
@@ -370,7 +371,7 @@ void kes_info(Kes* kes)
 		return;
 	printf("\n*** Cache info ***\n");
 	printf("Cache name: %s\n", kes->naziv);
-	printf("Last error: %s\n", kes->error);
+	printf("Last error: %d\n", kes->error);
 	printf("Size of data : %d\n", kes->velicina);
 	/*int broj_keseva = 1;
 	Kes* next = kes;

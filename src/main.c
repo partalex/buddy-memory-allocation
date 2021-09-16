@@ -6,7 +6,7 @@
 #include "../test/test.h"
 
 #define BLOCK_NUMBER (1000)
-#define THREAD_NUM (20)
+#define THREAD_NUM (5)
 #define ITERATIONS (1000)
 
 #define shared_size (7)
