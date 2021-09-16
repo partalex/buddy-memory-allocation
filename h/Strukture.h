@@ -83,6 +83,8 @@ struct kmem_cache_s
 	Slab_block* nepun;
 	Slab_block* pun;
 
+	unsigned short pomeraj;
+
 	Error error;
 	HANDLE mutex;
 };

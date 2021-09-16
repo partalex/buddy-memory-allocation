@@ -7,7 +7,7 @@
 #include "../h/Strukture.h"
 
 #define BLOCK_NUMBER (1000)
-#define THREAD_NUM (20)
+#define THREAD_NUM (15)
 #define ITERATIONS (1000)
 
 #define shared_size (7)
@@ -32,7 +32,7 @@ struct objects_s
 	kmem_cache_t* cache;
 	void* data;
 };
-
+ 
 void work(void* pdata)
 {
 	struct data_s data = *(struct data_s*)pdata;

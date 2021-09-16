@@ -150,18 +150,18 @@ void* slot_alloc(Slab_block* slab_block, unsigned* iz_praznog_slaba)
 
 void slab_info(Slab_block* slab_block) {
 	if (!slab_block)
-		printf("Does not exist\n");
+		printf("\tNe postoje\n");
 
 	Slab_block* next = slab_block;
 	while (next) {
-		printf("Address of slab : %p\n", next);
-		printf("Size of slab : %d\n", next->header.stepen_dvojke);
-		printf("Address of first slot : %zd\n", next->header.prvi_slot);
-		printf("Size of slot : %d\n", next->header.velicina_slota);
-		printf("Number of slots : %d\n", next->header.broj_slotova);
-		printf("Number of free slots : %d\n", next->header.broj_slobodnih_slotova);
-		printf("Number of slots : %d\n", next->header.stepen_dvojke);
-		printf("Address of next slab : %p\n", next->header.sledeci);
+		//printf("\tAdresa slaba : %p\n", next);
+		printf("\tBroj blokova: %d\n", (unsigned)pow(2, next->header.stepen_dvojke));
+		//printf("\tAdresa Prvog slota: %zd\n", next->header.prvi_slot);
+		printf("\tVelicina slota : %d\n", next->header.velicina_slota);
+		printf("\tBroj slotova : %d\n", next->header.broj_slotova);
+		printf("\tBroj slobodnih slotova : %d\n", next->header.broj_slobodnih_slotova);
+		//printf("\tAdresa sledeceg slaba : %p\n", next->header.sledeci);
+		printf("\tPopunjenost : %f \n", next->header.broj_slobodnih_slotova * 1. / next->header.broj_slotova);
 		next = next->header.sledeci;
 	}
 }
@@ -189,15 +189,32 @@ Slab_block* slab_alloc_typed(Kes* moj_kes)
 			slobodan->next = NULL;
 
 			Slab_block* ret = (Slab_block*)slobodan;
+			ret->header.moj_kes = moj_kes;
 			ret->header.stepen_dvojke = min_stepen;
 			ret->header.sledeci = NULL;
 			ret->header.local = local;
 			ret->header.velicina_slota = moj_kes->velicina;
-			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova = broj_slotova(ret->header.velicina_slota, ret->header.stepen_dvojke);
+			unsigned pomeraj = 0;
+			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova =
+				broj_slotova(ret->header.velicina_slota, ret->header.stepen_dvojke, &pomeraj);
 			ret->header.niz_slobodnih_slotova = (uintptr_t)ret + sizeof(Slab_block_header);
+			if (pomeraj >= CACHE_L1_LINE_SIZE) {
+				if (!moj_kes->pomeraj) {
+					moj_kes->pomeraj = pomeraj;
+					pomeraj = 0;
+				}
+				else {
+					unsigned old = moj_kes->pomeraj;
+					moj_kes->pomeraj -= CACHE_L1_LINE_SIZE;
+					pomeraj = CACHE_L1_LINE_SIZE;
+					if (moj_kes->pomeraj < CACHE_L1_LINE_SIZE)
+						moj_kes->pomeraj = 0;
+				}
+
+			}
+			else pomeraj = 0;
 			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header) +
-				ceil(ret->header.broj_slotova / 8.);
-			ret->header.moj_kes = moj_kes;
+				ceil(ret->header.broj_slotova / 8.) + pomeraj;
 
 			unsigned velicina_niza = ceil(ret->header.broj_slotova / 8.);
 			memset(ret->header.niz_slobodnih_slotova, 0xFF, ret->header.broj_slotova);
@@ -235,15 +252,16 @@ Slab_block* slab_alloc_buffered(Kes* moj_kes)
 			slobodan->next = NULL;
 
 			Slab_block* ret = (Slab_block*)slobodan;
+			ret->header.moj_kes = moj_kes;
 			ret->header.stepen_dvojke = min_stepen;
 			ret->header.sledeci = NULL;
 			ret->header.local = local;
 			ret->header.velicina_slota = moj_kes->velicina;
-			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova = broj_slotova(ret->header.velicina_slota, ret->header.stepen_dvojke);
+			ret->header.broj_slobodnih_slotova = ret->header.broj_slotova = 
+				broj_slotova(ret->header.velicina_slota, ret->header.stepen_dvojke, NULL);
 			ret->header.niz_slobodnih_slotova = (uintptr_t)ret + sizeof(Slab_block_header);
 			ret->header.prvi_slot = (uintptr_t)ret + sizeof(Slab_block_header) +
 				ceil(ret->header.broj_slotova / 8.);
-			ret->header.moj_kes = moj_kes;
 
 			unsigned velicina_niza = ceil(ret->header.broj_slotova / 8.);
 			memset(ret->header.niz_slobodnih_slotova, 0xFF, ret->header.broj_slotova);
@@ -334,9 +352,12 @@ void oslodi_slot(char* niz_slobodnih_slotova, unsigned index) {
 	*start |= mask;
 }
 
-unsigned broj_slotova(unsigned velicina_slota, unsigned stepen_dvojke) {
+unsigned broj_slotova(unsigned velicina_slota, unsigned stepen_dvojke, unsigned* fragment) {
 	unsigned preostali_bajtovi = BLOCK_SIZE * pow(2, stepen_dvojke) - sizeof(Slab_block_header);
-	return floor(preostali_bajtovi / (velicina_slota + 1. / 8));
+	unsigned broj_slotova = floor(preostali_bajtovi / (velicina_slota + 0.125));
+	if(fragment)
+		*fragment = preostali_bajtovi - broj_slotova * velicina_slota;
+	return broj_slotova;
 }
 
 unsigned neiskorisceno_bajtova(Slab_block* slab_block) {
@@ -344,3 +365,5 @@ unsigned neiskorisceno_bajtova(Slab_block* slab_block) {
 		sizeof(Slab_block_header) -
 		slab_block->header.broj_slotova * (slab_block->header.velicina_slota + 1. / 8);
 }
+
+

@@ -1,4 +1,4 @@
-#include <string.h>
+﻿#include <string.h>
 #include "../h/slab.h"
 #include "../h/Strukture.h"
 #include "../h/lockic.h"
@@ -369,26 +369,46 @@ void kes_info(Kes* kes)
 	int index = index_tipskog_kesa(kes);
 	if (index == -1)
 		return;
-	printf("\n*** Cache info ***\n");
-	printf("Cache name: %s\n", kes->naziv);
-	printf("Last error: %d\n", kes->error);
-	printf("Size of data : %d\n", kes->velicina);
-	/*int broj_keseva = 1;
-	Kes* next = kes;
-	while (next->sledeci) {
-		next = next->sledeci;
-		broj_keseva++;
-	}*/
-	printf("Constructor : %p\n", kes->ctor);
-	printf("Destructor : %p\n", kes->dtor);
+	printf("\n*** Kes informacije ***\n");
+	printf("Naziv : %s\n", kes->naziv);
+	printf("\tVelicina podatka : %d\n", kes->velicina);
 
-	printf("\nFull slabs : \n");
+	//printf("Size of kes : %d\n",); //veličina celog keša izraženog u broju blokova
+
+	unsigned broj_ploca = 0;
+	Slab_block* next;
+	next = kes->prazan;
+	while (next) {
+		broj_ploca++;
+		next = next->header.sledeci;
+	}
+	next = kes->nepun;
+	while (next) {
+		broj_ploca++;
+		next = next->header.sledeci;
+	}
+	next = kes->pun;
+	while (next) {
+		broj_ploca++;
+		next = next->header.sledeci;
+	}
+
+	printf("\tBroj ploca : %d\n", broj_ploca);
+	//printf("\tBroj objekata u jednoj ploci : %d\n", );
+	//printf("\tPopunjenost : %d\n", );
+	
+
+	//printf("\tLast error: %d\n", kes->error);
+	//printf("\tConstructor : %p\n", kes->ctor);
+	//printf("\tDestructor : %p\n", kes->dtor);
+
+	printf("\nPuni slabovi : \n");
 	slab_info(kes->pun);
 
-	printf("\nHalffull slabs : \n");
+	printf("\nNepuni slabovi : \n");
 	slab_info(kes->nepun);
 
-	printf("\nEmptry slabs : \n");
+	printf("\nPrazni slabovi : \n");
 	slab_info(kes->prazan);
 	printf("\n******************\n");
 
