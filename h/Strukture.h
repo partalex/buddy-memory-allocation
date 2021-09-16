@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <windows.h>
 
+typedef enum {
+	NO_ERROS,
+	//NE_POSTOJI_KES,
+	NUSPELA_ALOKACIJA_SLABA,
+	NUSPELA_ALOKACIJA_SLOTA,
+	OBJEKAT_ZA_KOJE_JE_ZATEVANO_BRISANJE_SE_NE_NALAZI_U_KESU,
+	NE_MOZE_DA_SE_SRINKUJE
+} Error;
+
 // typedef struct kmem_cache_s kmem_cache_t;
 typedef struct kmem_cache_s kmem_cache_t;
 typedef struct kmem_cache_s Kes;
@@ -18,6 +27,7 @@ typedef struct s_Slab_block Slab_block;
 typedef struct s_Buddy_block
 {
 	struct s_Buddy_block* sledeci;
+	unsigned short local;
 } Buddy_block;
 
 typedef struct
@@ -49,6 +59,7 @@ typedef struct s_Slab_block_header
 	struct s_Slab_block* sledeci;
 	uintptr_t prvi_slot;
 	unsigned broj_slotova;
+	unsigned short local;
 	unsigned velicina_slota;
 	unsigned broj_slobodnih_slotova;
 	unsigned short stepen_dvojke;
@@ -72,7 +83,8 @@ struct kmem_cache_s
 	Slab_block* nepun;
 	Slab_block* pun;
 
-	Kes* sledeci; // pokazivac
+	//Kes* sledeci; // pokazivac
+	Error error;
 	HANDLE mutex;
 };
 

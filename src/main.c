@@ -6,7 +6,7 @@
 #include "../test/test.h"
 
 #define BLOCK_NUMBER (1000)
-#define THREAD_NUM (3)
+#define THREAD_NUM (20)
 #define ITERATIONS (1000)
 
 #define shared_size (7)
@@ -16,8 +16,6 @@ void construct(void* data)
 	static int i = 1;
 	printf_s("%d Shared object constructed.\n", i++);
 	memset(data, MASK, shared_size);
-	unsigned char* proba = data;
-	proba[0];
 }
 
 int check(void* data, size_t size)

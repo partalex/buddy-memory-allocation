@@ -87,27 +87,38 @@ Kes* kes_alloc(const char* naziv, size_t velicina, // size je broj blokova ili v
 void oslobodi_slabove_kesa(Kes* kes)
 {
 	Slab_block* next = kes->nepun;
-	Slab_block* za_oslobadjanje = NULL;
+	Buddy_block* za_oslobadjanje = NULL;
+	unsigned short local;
+	unsigned short stepen;
 	while (next)
 	{
+		local = next->header.local;
+		stepen = next->header.stepen_dvojke;
 		za_oslobadjanje = next;
+		za_oslobadjanje->local = local;
 		next = next->header.sledeci;
-		oslobodi((Buddy_block*)za_oslobadjanje, za_oslobadjanje->header.stepen_dvojke);
+		oslobodi(za_oslobadjanje, stepen);
 	}
 
 	next = kes->pun;
 	while (next)
 	{
+		local = next->header.local;
+		stepen = next->header.stepen_dvojke;
 		za_oslobadjanje = next;
+		za_oslobadjanje->local = local;
 		next = next->header.sledeci;
-		oslobodi((Buddy_block*)za_oslobadjanje, za_oslobadjanje->header.stepen_dvojke);
+		oslobodi(za_oslobadjanje, stepen);
 	}
 	next = kes->prazan;
 	while (next)
 	{
+		local = next->header.local;
+		stepen = next->header.stepen_dvojke;
 		za_oslobadjanje = next;
+		za_oslobadjanje->local = local;
 		next = next->header.sledeci;
-		oslobodi((Buddy_block*)za_oslobadjanje, za_oslobadjanje->header.stepen_dvojke);
+		oslobodi(za_oslobadjanje, stepen);
 	}
 	kes->prazan = NULL;
 	kes->nepun = NULL;
@@ -149,14 +160,18 @@ Slab_block* obezbedi_slab_za_buff_obj(Kes* kes) {
 void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
 	if (index_tipskog_kesa(kes) == -1)
-		return NULL; // greska 
+		return NULL;
 	int iz_praznog_slaba = 1;
 	Slab_block* slab_block = obezbedi_slab_za_typed_obj(kes, &iz_praznog_slaba);
-	if (!slab_block)
+	if (!slab_block) {
+		kes->error = NUSPELA_ALOKACIJA_SLABA;
 		return NULL;
+	}
 	void* slot = slot_alloc(slab_block, &iz_praznog_slaba);
-	if (!slot)
+	if (!slot) {
+		kes->error = NUSPELA_ALOKACIJA_SLOTA;
 		return NULL;
+	}
 	if (kes->ctor)
 		kes->ctor(slot);
 	return slot;
@@ -165,12 +180,16 @@ void* obj_type_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 void* obj_buffer_alloc(Kes* kes) // vraca obj tipa koji kes cuva
 {
 	Slab_block* slab_block = obezbedi_slab_za_buff_obj(kes);
-	if (!slab_block)
+	if (!slab_block) {
+		kes->error = NUSPELA_ALOKACIJA_SLABA;
 		return NULL;
-	short iz_praznog_slaba = 1;
+	}
+	unsigned iz_praznog_slaba = 1;
 	void* slot = slot_alloc(slab_block, &iz_praznog_slaba);
-	if (!slot)
+	if (!slot) {
+		kes->error = NUSPELA_ALOKACIJA_SLOTA;
 		return NULL;
+	}
 	return slot;
 }
 
@@ -296,6 +315,8 @@ void obj_free(Kes* kes, void* obj)
 	if (index == -1)
 		return;
 	Slab_block* za_brisanje = pronadji_slab_objekta_kog_brises(kes, obj);
+	if (!za_brisanje)
+		kes->error = OBJEKAT_ZA_KOJE_JE_ZATEVANO_BRISANJE_SE_NE_NALAZI_U_KESU;
 }
 
 void* buff_alloc(size_t size)
@@ -303,53 +324,43 @@ void* buff_alloc(size_t size)
 	unsigned stepen = min_stepen_za_broj_blokova(size);
 	// kontrola da li moze da stane u taj kes
 	if (stepen < 5 || stepen > 17)
-		return NULL;
+		return NULL; // ne znam kome se salje ovaj error
 	return obj_buffer_alloc(&slab->baferisani_kesevi[stepen - 5]);
 }
 
 void buff_free(const void* buff)
 {
-	unsigned char iz_punog_slaba = 0;
 	Kes* kes;
 	for (size_t i = 0; i < BROJ_KESEVA_ZA_BAFERE; i++) {
 		if (kes = pronadji_slab_objekta_kog_brises(&slab->baferisani_kesevi[i], buff)) {
 			return;
 		}
 	}
+	kes->error = OBJEKAT_ZA_KOJE_JE_ZATEVANO_BRISANJE_SE_NE_NALAZI_U_KESU;
 }
 
 int skupi_kes(Kes* kes) // vraca broj oslobodjenih blokova
 {
-	int osobodjeni_kesevi = 0;
 	int index = index_tipskog_kesa(kes);
 	if (index == -1)
 		return NULL;
-
-	int pola = kes->velicina;
-	Slab_block* next = kes->nepun;
-	Slab_block* prev = NULL;
+	int osobodjeni_blokovi = 0;
+	Slab_block* next = kes->prazan;
+	Buddy_block* buddy;
+	unsigned stepen;
+	unsigned short local;
 	while (next) {
-		//if ()
-
+		kes->prazan = next;
+		stepen = next->header.stepen_dvojke;
+		local = next->header.local;
+		buddy = next;
+		buddy->local = local;
+		osobodjeni_blokovi += pow(2, stepen);
+		oslobodi(buddy, stepen);
 	}
-
-	next = kes->prazan;
-	prev = NULL;
-	while (next) {
-		prev = next;
-		next = next->header.sledeci;
-	}
-	if (!next)
-		return osobodjeni_kesevi;
-	else {
-		if (!prev) {
-			return osobodjeni_kesevi + bajtove_u_min_blokova(kes->velicina);
-		}
-		else {
-
-		}
-	}
-	return osobodjeni_kesevi;
+	if (!osobodjeni_blokovi)
+		kes->error = NE_MOZE_DA_SE_SRINKUJE;
+	return osobodjeni_blokovi;
 }
 
 void kes_info(Kes* kes)
@@ -358,7 +369,8 @@ void kes_info(Kes* kes)
 	if (index == -1)
 		return;
 	printf("\n*** Cache info ***\n");
-	printf("Cache nem: %s\n", kes->naziv);
+	printf("Cache name: %s\n", kes->naziv);
+	printf("Last error: %s\n", kes->error);
 	printf("Size of data : %d\n", kes->velicina);
 	/*int broj_keseva = 1;
 	Kes* next = kes;
@@ -383,19 +395,35 @@ void kes_info(Kes* kes)
 
 int kes_error(Kes* kes)
 {
-	int error = 0;
+	int error;
 	int index = index_tipskog_kesa(kes);
-	if (index == -1)
-		error = 2;
-
-	switch (error)
-	{
-	case 1:
-		printf("No more space");
-		return 1;
-	case 2:
-		printf("Cache does not exsist");
-		return 2;
+	if (index == -1) {
+		printf("Ne postoji kes");
+		return -1;
 	}
-	return error;
+	switch (kes->error)
+	{
+	case 0:
+		printf("NO_ERROS");
+		return kes->error;
+	case 1:
+		printf("NE_POSTOJI_KES");
+		return kes->error;
+	case 2:
+		printf("NUSPELA_ALOKACIJA_SLABA");
+		return kes->error;
+	case 3:
+		printf("NUSPELA_ALOKACIJA_SLOTA");
+		return kes->error;
+	case 4:
+		printf("OBJEKAT_ZA_KOJE_JE_ZATEVANO_BRISANJE_SE_NE_NALAZI_U_KESU");
+		return kes->error;
+	case 5:
+		printf("NE_MOZE_DA_SE_SRINKUJE");
+		return kes->error;
+	default:
+		printf("Nedefinisan error");
+		return -1;
+	}
+	return 0;
 }
