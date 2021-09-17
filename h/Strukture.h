@@ -17,7 +17,6 @@ typedef struct kmem_cache_s kmem_cache_t;
 typedef struct kmem_cache_s Kes;
 typedef struct s_Slab_block Slab_block;
 #define VELICINA_PAMTLJIVOG (10) // ovo bi trebalo da se izracuna
-// #define velicna_pamtljivog (floor(log2((double)995)) + 1) // ovo bi trebalo da se izracuna
 
 /////////////////////////////************************/////////////////////////////
 /////////////////////////////*******  Buddy  ********/////////////////////////////
@@ -88,11 +87,26 @@ struct kmem_cache_s
 	Error error;
 	HANDLE mutex;
 };
-
-#define BROJ_KESEVA_ZA_BAFERE (13)
 #define BLOCK_SIZE (4096)
-#define BROJ_TIPSKIH_KESEVA (41) // jedan block
-//#define BROJ_TIPSKIH_KESEVA (97) // dva blocka
+#define BROJ_KESEVA_ZA_BAFERE (13)
+#define MIN_BROJ_KESEVA (98)
+
+#define KES_SIZE (72)
+#define SLAB_SIZE (1216)
+#define MAX_BROJ_KESEVA_U_JEDNOM_BLOKU  BLOCK_SIZE / KES_SIZE
+#define BROJ_TIPSKIH_KESEVA_ISPOD_SLABA (BLOCK_SIZE - SLAB_SIZE) / KES_SIZE
+#define	BROJ_TIPSKIH_KESEVA (41)
+#if MIN_BROJ_KESEVA < BROJ_TIPSKIH_KESEVA_ISPOD_SLABA
+#define BROJ_TIPSKIH_KESEVA		BROJ_TIPSKIH_KESEVA_ISPOD_SLABA
+#define BROJ_REZERVISANIH_BLOKOVA	(1)
+
+#else
+#define OSTATAK		(MIN_BROJ_KESEVA - BROJ_TIPSKIH_KESEVA_ISPOD_SLABA)
+#define CEILING(x,y) (((x) + (y) - 1) / (y))
+#define BROJ_BLOKOVA_ZA_OSTATAK_KESEVA		CEILING(OSTATAK,MAX_BROJ_KESEVA_U_JEDNOM_BLOKU)
+#define BROJ_REZERVISANIH_BLOKOVA	(BROJ_BLOKOVA_ZA_OSTATAK_KESEVA + 1)
+#define BROJ_TIPSKIH_KESEVA		(BROJ_TIPSKIH_KESEVA_ISPOD_SLABA + MAX_BROJ_KESEVA_U_JEDNOM_BLOKU * BROJ_BLOKOVA_ZA_OSTATAK_KESEVA)
+#endif 
 
 typedef struct s_Slab
 {

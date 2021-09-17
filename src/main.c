@@ -7,7 +7,7 @@
 #include "../h/Strukture.h"
 
 #define BLOCK_NUMBER (1000)
-#define THREAD_NUM (15)
+#define THREAD_NUM (5)
 #define ITERATIONS (1000)
 
 #define shared_size (7)
@@ -60,8 +60,8 @@ void work(void* pdata)
 		size++;
 	}
 
-	kmem_cache_info(cache);
-	kmem_cache_info(data.shared);
+	//kmem_cache_info(cache);
+	//kmem_cache_info(data.shared);
 
 	for (int i = 0; i < size; i++)
 	{
@@ -91,3 +91,5 @@ int main()
 	free(space);
 	return 0;
 }
+
+

@@ -41,12 +41,12 @@ void slab_inic(uintptr_t pocetna_adresa, unsigned ukupan_broj_blokova)
 
 	slab->ulancani_kesevi = (Kes*)(pocetna_adresa + sizeof(Slab)); // prazna lista keseva
 	inic_tipske_keseve();
+
 	memset(slab->niz_napravljenih_keseva, 0, BROJ_TIPSKIH_KESEVA * sizeof(unsigned char));
 
-	//unsigned broj_bajtova = sizeof(Slab) + BROJ_TIPSKIH_KESEVA * sizeof(Kes);
-	slab->buddy.broj_blokova = (unsigned)(ukupan_broj_blokova - (unsigned)ceil(((sizeof(Slab) + BROJ_TIPSKIH_KESEVA * sizeof(Kes)) * 1.) / BLOCK_SIZE)); // ova linija moze da bude promeljiva
+	slab->buddy.broj_blokova = ukupan_broj_blokova - BROJ_REZERVISANIH_BLOKOVA; // ova linija moze da bude promeljiva
 
-	slab->buddy.pocetna_adesa = (Buddy*)(pocetna_adresa + (uintptr_t)((ukupan_broj_blokova - slab->buddy.broj_blokova) * BLOCK_SIZE));
+	slab->buddy.pocetna_adesa = pocetna_adresa + BROJ_REZERVISANIH_BLOKOVA * BLOCK_SIZE;
 
 	buddy = &slab->buddy;
 	memset(buddy->niz_slobodnih_blokova, 0, VELICINA_PAMTLJIVOG * sizeof(Buddy_block*));
@@ -396,7 +396,7 @@ void kes_info(Kes* kes)
 	printf("\tBroj ploca : %d\n", broj_ploca);
 	//printf("\tBroj objekata u jednoj ploci : %d\n", );
 	//printf("\tPopunjenost : %d\n", );
-	
+
 
 	//printf("\tLast error: %d\n", kes->error);
 	//printf("\tConstructor : %p\n", kes->ctor);
